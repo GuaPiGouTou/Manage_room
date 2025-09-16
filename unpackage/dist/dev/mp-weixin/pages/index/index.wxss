@@ -1,0 +1,136 @@
+
+.prop.data-v-1cf27b2a {
+	  width: 280px; 
+	  height: 250px; 
+	  background-color: aliceblue; 
+	  border-radius: 10px; 
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;       /* 水平居中 */
+	  justify-content: center;   /* 垂直居中 */
+	  padding: 20px 0;           /* 调整内边距 */
+	  font-size: 20px;
+}
+.prop image.data-v-1cf27b2a {
+	  width: 50px; 
+	  height: 50px; 
+	  margin-bottom: 30px;      /* 图片下间距 */
+}
+.prop text.data-v-1cf27b2a {
+	  text-align: center;       /* 文本居中 */
+}
+.prop button.data-v-1cf27b2a {
+	  width: 80%; 
+	  margin-top: 30px;         /* 按钮上间距 */
+}
+.login-container.data-v-1cf27b2a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40rpx;
+    min-height: 100vh;
+    background-color: #f7f7f7;
+}
+.login-header.data-v-1cf27b2a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 100rpx;
+    margin-bottom: 80rpx;
+}
+.logo.data-v-1cf27b2a {
+    height: 160rpx;
+    width: 160rpx;
+    border-radius: 24rpx;
+}
+.app-name.data-v-1cf27b2a {
+    font-size: 40rpx;
+    font-weight: bold;
+    margin-top: 20rpx;
+    color: #333;
+}
+.login-form.data-v-1cf27b2a, .wechat-login.data-v-1cf27b2a {
+    width: 100%;
+    padding: 0 40rpx;
+    box-sizing: border-box;
+}
+.form-item.data-v-1cf27b2a {
+    display: flex;
+    align-items: center;
+    height: 100rpx;
+    background: #ffffff;
+    border-radius: 12rpx;
+    padding: 0 30rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.input.data-v-1cf27b2a {
+    flex: 1;
+    height: 100rpx;
+    margin-left: 20rpx;
+    font-size: 32rpx;
+}
+.placeholder.data-v-1cf27b2a {
+    color: #cccccc;
+}
+.login-btn.data-v-1cf27b2a {
+    background-color: #07C160;
+    color: #ffffff;
+    font-size: 34rpx;
+    height: 90rpx;
+    line-height: 90rpx;
+    border-radius: 45rpx;
+    margin-top: 20rpx;
+}
+.wechat-login-btn.data-v-1cf27b2a {
+    background-color: #07C160;
+    color: #ffffff;
+    font-size: 34rpx;
+    height: 90rpx;
+    line-height: 90rpx;
+    border-radius: 45rpx;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.wechat-login-btn text.data-v-1cf27b2a {
+    margin-left: 15rpx;
+}
+.login-switch.data-v-1cf27b2a {
+    text-align: center;
+    font-size: 28rpx;
+    color: #07C160;
+    margin-top: 40rpx;
+    padding: 20rpx;
+}
+.agreement.data-v-1cf27b2a {
+    position: fixed;
+    bottom: 60rpx;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24rpx;
+    color: #666;
+}
+.agreement-link.data-v-1cf27b2a {
+    color: #07C160;
+    margin-left: 8rpx;
+}
+  
+  /* 按钮激活状态 */
+button.data-v-1cf27b2a:active {
+    opacity: 0.8;
+}
+  
+  /* 去除微信小程序按钮的默认样式 */
+button.data-v-1cf27b2a::after {
+    border: none;
+}
+  
+  /* 按钮禁用样式 */
+button[disabled].data-v-1cf27b2a {
+    background-color: #cccccc !important;
+    color: #999 !important;
+}

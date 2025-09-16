@@ -1,0 +1,123 @@
+
+.houseitem{
+		display: flex; 
+		flex-direction: column; 
+		width: 120rpx;
+		height: 120rpx;
+		margin: 5rpx;
+		align-items: center;
+}
+.prop {
+	  width: 280px; 
+	  height: 250px; 
+	  background-color: aliceblue; 
+	  border-radius: 10px; 
+	  display: flex;
+	  flex-direction: column;
+	  align-items: center;       /* 水平居中 */
+	  justify-content: center;   /* 垂直居中 */
+	  padding: 20px 0;           /* 调整内边距 */
+	  font-size: 20px;
+}
+.prop image {
+	  width: 50px; 
+	  height: 50px; 
+	  margin-bottom: 30px;      /* 图片下间距 */
+}
+.prop text {
+	  text-align: center;       /* 文本居中 */
+}
+.prop button {
+	  width: 80%; 
+	  margin-top: 30px;         /* 按钮上间距 */
+}
+.container {
+    padding: 20rpx;
+    background-color: #f5f5f5;
+}
+.section {
+    background-color: #fff;
+    border-radius: 16rpx;
+    padding: 24rpx;
+    margin-bottom: 30rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.05);
+}
+.section-title {
+    font-size: 32rpx;
+    font-weight: bold;
+    margin-bottom: 24rpx;
+    color: #333;
+}
+.location-btn {
+    background-color: #07c160;
+    color: white;
+    border-radius: 12rpx;
+    font-size: 28rpx;
+    margin-bottom: 20rpx;
+}
+.location-info {
+    background-color: #f9f9f9;
+    padding: 20rpx;
+    border-radius: 12rpx;
+    margin-top: 16rpx;
+}
+.coords-container {
+    display: flex;
+    margin-top: 16rpx;
+}
+.coord-item {
+    flex: 1;
+}
+.info-label {
+    font-weight: bold;
+    color: #666;
+    margin-right: 10rpx;
+}
+.info-value {
+    color: #333;
+}
+.input {
+    height: 80rpx;
+    border: 1rpx solid #eee;
+    border-radius: 12rpx;
+    padding: 0 20rpx;
+    margin-bottom: 24rpx;
+    font-size: 28rpx;
+}
+.payment-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20rpx;
+}
+.payment-input {
+    flex: 1;
+    height: 70rpx;
+    border: 1rpx solid #eee;
+    border-radius: 12rpx;
+    padding: 0 20rpx;
+    margin-right: 16rpx;
+    font-size: 28rpx;
+}
+.payment-label {
+    width: 120rpx;
+    font-size: 26rpx;
+    color: #666;
+}
+.add-payment {
+    background-color: #f0f0f0;
+    color: #666;
+    font-size: 26rpx;
+    margin-top: 10rpx;
+}
+.submit-btn {
+    background-color: #07c160;
+    color: white;
+    border-radius: 12rpx;
+    font-size: 32rpx;
+    margin-top: 30rpx;
+}
+.houseclass{
+  	display: flex;
+  	flex-direction: row;
+  	flex-wrap: wrap;
+}

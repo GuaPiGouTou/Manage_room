@@ -1,0 +1,1 @@
+<view> room <editor></editor><button class="submit-btn" bindtap="{{a}}">下一步</button></view>

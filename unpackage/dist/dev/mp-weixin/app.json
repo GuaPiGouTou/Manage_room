@@ -1,0 +1,21 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/map/map",
+    "pages/marker/marker",
+    "pages/marker/addMarker/addMarker",
+    "pages/marker/addMarker/NextRoom"
+  ],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "uni-app",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "获取当前位置"
+    }
+  },
+  "usingComponents": {}
+}
