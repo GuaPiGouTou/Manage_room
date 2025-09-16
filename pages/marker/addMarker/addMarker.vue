@@ -23,28 +23,112 @@
         </view>
       </view>
     </view>
-	<!-- 联系方式 -->
-    <view class="section">
-      <view class="section-title">联系方式</view>
-      <input class="input" placeholder="微信" v-model="wechat" />
-      <input class="input" placeholder="手机号" v-model="phone" type="number" />
-    </view>
+
     <!-- 房源基本信息 -->
     <view class="section">
       <view class="section-title">房源信息</view>
       <input class="input" placeholder="房源标题" v-model="title" />
       <input class="input" placeholder="具体地点" v-model="location" />
       <input class="input" placeholder="面积（平方米）" v-model="area" />
+      <input class="input" placeholder="房型（如：2室1厅）" v-model="houseType" />
       <view ><text style="margin-left: 10rpx; margin-bottom: 10rpx; font-weight: 500;">房间数量</text><input class="input" placeholder="" v-model="count" type="number" /></view>
     </view>
-	
-    
-	
 
+    <!-- 联系方式 -->
+    <view class="section">
+      <view class="section-title">联系方式</view>
+      <input class="input" placeholder="微信" v-model="wechat" />
+      <input class="input" placeholder="手机号" v-model="phone" type="number" />
+    </view>
+	
+	
+    <!-- 支付选项 -->
+    <view class="section">
+      <view class="section-title">支付选项</view>
+      <view v-for="(value, key, index) in paymentOptions" :key="index" class="payment-item">
+        <input class="payment-input" type="number" :placeholder="`${key}价格`" v-model="paymentOptions[key]" />
+        <text class="payment-label">{{key}}</text>
+      </view>
+      <!-- <button class="add-payment" @tap="addPaymentOption">+ 添加支付方式</button> -->
+    </view>
+	<!-- 家电选项 -->
+    <view class="section">
+      <view class="section-title">家具选项</view>
+		<view  class="houseclass"  >
+			<view v-for="index in 7" :key="index"	>
+				<view @click="onhouse(index)" >
+					<view class="houseitem" v-if="houseFacilities[index]">
+					<text style="color: #4db0e4;">{{houseName[index-1]}}</text>
+					<image style="width: 80rpx; height: 100rpx;"  :src="`/static/map/furniture/select/${index}.png`"  ></image>
+					</view>
+					
+					<view class="houseitem" v-else>
+					<text>{{houseName[index-1]}}</text>
+					<image style="width: 80rpx; height: 100rpx;"  :src="`/static/map/furniture/de/${index}.png`"  ></image>
+					</view>
+				</view>
+			</view>
+		
+			
+		</view>
+    </view>
+	
+	
+	 <!-- 上传按钮 -->
+	<view class="section">
+      <view class="section-title">媒体上传</view>
+      <button class="location-btn" @tap="selectvideo">
+        <text>上传视频</text>
+      </button>
+	  <view v-for="(item,index) in filepath" :key="index">
+		  <view style="display: flex;flex-direction: row; width: 200px;">
+		   <text>{{(item.size/1048576).toFixed(2)}}MB</text> 
+		   <button @click="deleteFilePath(index)" type="warn">删除</button>
+		   </view>
+	  </view>
+	
+		<uni-popup ref="error" type="bottom" border-radius="10px 10px 0 0">
+			<view class="prop">
+			<image src="/static/index/error.png" ></image>
+				<text>{{msg}}</text>
+					<button @tap="successbvideo_close " type="primary">返回</button>
+				
+			</view>
+		</uni-popup>
+		<uni-popup ref="success" type="bottom" border-radius="10px 10px 0 0">
+			<view class="prop">
+			<image src="/static/index/success.png" ></image>
+				<text>{{msg}}</text>
+					<button @tap="successbvideo_toMap " type="primary">完成</button>
+				
+			</view>
+		</uni-popup>
+		
+		
+    </view>
+
+	<!-- 媒体类型选择 -->
+	    <uni-popup ref="mediaPopup" type="bottom">
+	      <view class="media-actions">
+	        <view class="action-item" @tap="chooseMedia('camera', 'image')">
+	          <uni-icons type="camera" size="24"></uni-icons>
+	          <text>拍摄照片</text>
+	        </view>
+	        <view class="action-item" @tap="chooseMedia('album', 'image')">
+	          <uni-icons type="image" size="24"></uni-icons>
+	          <text>相册选图</text>
+	        </view>
+	        <view class="action-item" @tap="chooseMedia('camera', 'video')">
+	          <uni-icons type="videocam" size="24"></uni-icons>
+	          <text>拍摄视频</text>
+	        </view>
+	        <view class="action-item cancel" @tap="closeMediaPopup">
+	          <text>取消</text>
+	        </view>
+	      </view>
+	    </uni-popup>
     <!-- 提交按钮 -->
     <button class="submit-btn" @tap="submitHouseInfo">提交房源信息</button>
-	<!-- 下一步按钮 -->
-    <button class="submit-btn" @tap="nextroom">下一步</button>
   </view>
 </template>
 
@@ -85,11 +169,6 @@
       }
     },
     methods: {
-		nextroom(){
-			uni.navigateTo({
-				url:"/pages/marker/addMarker/NextRoom"
-			})
-		},
 		//删除视频路径
 		deleteFilePath(index){
 			this.filepath.splice(index, 1)
