@@ -10,6 +10,7 @@
     <!-- 微信授权登录 -->
 	<view style="background-color: beige; border-radius: 300px;">
 		<button type="primary"  style="border-radius: 30rpx;" @tap="openLoing">微信授权登录</button>
+		<button type="primary"  style="border-radius: 30rpx;" @tap="ToMap1()">add</button>
 	</view>
 	<uni-popup ref="popup" type="bottom" border-radius="10px 10px 0 0">
 		
@@ -17,6 +18,7 @@
 		<image src="/static/index/success.png" ></image>
 			<text>{{msg}}</text>
 				<button @tap="ToMap" type="primary">进入主页</button>
+				
 				
 		</view>
 	</uni-popup>
@@ -85,7 +87,8 @@
 					}},
 				fail: (res) => {console.log(res)}
 			})
-		},   
+		},  
+	
 	  ToMap(){
 		uni.redirectTo({
 			url:"/pages/map/map"

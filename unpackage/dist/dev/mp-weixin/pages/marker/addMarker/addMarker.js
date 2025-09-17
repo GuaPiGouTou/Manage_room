@@ -4,7 +4,7 @@ const _sfc_main = {
   data() {
     return {
       // 位置信息
-      locationName: "",
+      locationName: "s",
       longitude: 0,
       latitude: 0,
       //视频信息
@@ -33,6 +33,21 @@ const _sfc_main = {
         "年付": 0
       }
     };
+  },
+  computed: {
+    ...common_vendor.mapState(["baseInfo"])
+  },
+  watch: {
+    // 监听基本信息变化并保存到Vuex
+    baseInfo: {
+      deep: true,
+      handler(newVal) {
+        this.$store.dispatch("saveBaseInfo", newVal);
+      }
+    }
+  },
+  //页面卸载时
+  onUnload() {
   },
   methods: {
     nextroom() {
@@ -65,13 +80,13 @@ const _sfc_main = {
         mediaType: ["video"],
         maxDuration: 60,
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:120", "chooseMedia_Success");
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:121", res.tempFiles[0].size / 1048576);
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:133", "chooseMedia_Success");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:134", res.tempFiles[0].size / 1048576);
           const that = this;
           that.filepath.push(...res.tempFiles);
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:127", "chooseMedia");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:140", "chooseMedia");
         }
       });
     },
@@ -195,11 +210,11 @@ const _sfc_main = {
             // 微信云托管环境ID
           },
           success(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:273", "uploadFile_success");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:286", "uploadFile_success");
             that.uid[i] = res2.fileID;
           },
           fail(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:279", "uploadFile_fail");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:292", "uploadFile_fail");
           }
         });
       }
@@ -235,24 +250,24 @@ const _sfc_main = {
         "method": "POST",
         "data": houseData
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:315", res);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:328", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:318", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:331", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:324", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:337", "操作成功:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:328", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:341", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:333", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:346", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:337", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:350", "请求失败:", error);
       });
     }
     // // 处理支付选项格式
@@ -270,24 +285,23 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     a: common_vendor.o((...args) => $options.chooseLocation && $options.chooseLocation(...args)),
     b: $data.locationName
   }, $data.locationName ? {
-    c: common_vendor.t($data.locationName),
-    d: common_vendor.t($data.longitude),
-    e: common_vendor.t($data.latitude)
+    c: common_vendor.t(_ctx.baseInfo.locationName),
+    d: common_vendor.t(_ctx.baseInfo.longitude),
+    e: common_vendor.t(_ctx.baseInfo.latitude)
   } : {}, {
-    f: $data.wechat,
-    g: common_vendor.o(($event) => $data.wechat = $event.detail.value),
-    h: $data.phone,
-    i: common_vendor.o(($event) => $data.phone = $event.detail.value),
-    j: $data.title,
-    k: common_vendor.o(($event) => $data.title = $event.detail.value),
-    l: $data.location,
-    m: common_vendor.o(($event) => $data.location = $event.detail.value),
-    n: $data.area,
-    o: common_vendor.o(($event) => $data.area = $event.detail.value),
-    p: $data.count,
-    q: common_vendor.o(($event) => $data.count = $event.detail.value),
-    r: common_vendor.o((...args) => $options.submitHouseInfo && $options.submitHouseInfo(...args)),
-    s: common_vendor.o((...args) => $options.nextroom && $options.nextroom(...args))
+    f: _ctx.baseInfo.wechat,
+    g: common_vendor.o(($event) => _ctx.baseInfo.wechat = $event.detail.value),
+    h: _ctx.baseInfo.phone,
+    i: common_vendor.o(($event) => _ctx.baseInfo.phone = $event.detail.value),
+    j: _ctx.baseInfo.title,
+    k: common_vendor.o(($event) => _ctx.baseInfo.title = $event.detail.value),
+    l: _ctx.baseInfo.location,
+    m: common_vendor.o(($event) => _ctx.baseInfo.location = $event.detail.value),
+    n: _ctx.baseInfo.area,
+    o: common_vendor.o(($event) => _ctx.baseInfo.area = $event.detail.value),
+    p: _ctx.baseInfo.count,
+    q: common_vendor.o(($event) => _ctx.baseInfo.count = $event.detail.value),
+    r: common_vendor.o((...args) => $options.nextroom && $options.nextroom(...args))
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

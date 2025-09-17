@@ -41,7 +41,7 @@ const _sfc_main = {
     openLoing() {
       common_vendor.wx$1.login({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:61", res.code);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:63", res.code);
           if (res.code) {
             common_vendor.index.request({
               url: "https://api.weixin.qq.com/sns/jscode2session",
@@ -53,20 +53,20 @@ const _sfc_main = {
                 grant_type: "authorization_code"
               },
               success: (res2) => {
-                common_vendor.index.__f__("log", "at pages/index/index.vue:75", res2);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:77", res2);
                 common_vendor.wx$1.setStorageSync("session_key", res2.data.session_key);
                 common_vendor.wx$1.setStorageSync("openid", res2.data.openid);
                 this.msg = "成功登录";
                 this.$refs.popup.open("center");
               },
               fail(res2) {
-                common_vendor.index.__f__("log", "at pages/index/index.vue:81", res2);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:83", res2);
               }
             });
           }
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:86", res);
+          common_vendor.index.__f__("log", "at pages/index/index.vue:88", res);
         }
       });
     },
@@ -89,11 +89,12 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
     a: common_assets._imports_0,
     b: common_vendor.o((...args) => $options.openLoing && $options.openLoing(...args)),
-    c: common_assets._imports_1,
-    d: common_vendor.t($data.msg),
-    e: common_vendor.o((...args) => $options.ToMap && $options.ToMap(...args)),
-    f: common_vendor.sr("popup", "1cf27b2a-0"),
-    g: common_vendor.p({
+    c: common_vendor.o(($event) => $options.ToMap1()),
+    d: common_assets._imports_1,
+    e: common_vendor.t($data.msg),
+    f: common_vendor.o((...args) => $options.ToMap && $options.ToMap(...args)),
+    g: common_vendor.sr("popup", "1cf27b2a-0"),
+    h: common_vendor.p({
       type: "bottom",
       ["border-radius"]: "10px 10px 0 0"
     })

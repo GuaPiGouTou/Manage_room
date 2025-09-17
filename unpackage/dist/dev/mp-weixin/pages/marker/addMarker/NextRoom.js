@@ -1,366 +1,153 @@
 "use strict";
 const common_vendor = require("../../../common/vendor.js");
-const common_assets = require("../../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
-      // 位置信息
-      locationName: "",
-      longitude: 0,
-      latitude: 0,
-      //视频信息
-      msg: "成功上传",
-      uid: [],
-      filepath: [],
-      // 房源基本信息
-      swiperIds: [],
-      title: "",
-      videoId: "",
-      location: "",
-      area: "",
-      houseType: "",
-      count: 0,
-      // 设施信息
-      houseFacilities: [false, false, false, false, false, false, false],
-      // 空调,洗衣机,冰箱,厨房
-      houseName: ["浴缸", "花洒", "冰箱", "空调", "微波炉", "洗衣机", "油烟机"],
-      // 联系方式
-      wechat: "",
-      phone: "",
-      // 支付选项
-      paymentOptions: {
-        "月付": 0,
-        "半年付": 0,
-        "年付": 0
-      }
+      facilities: ["空调", "洗衣机", "冰箱", "厨房", "电视", "WiFi", "书桌", "衣柜"],
+      roomData: {}
     };
   },
+  computed: {
+    ...common_vendor.mapState(["baseInfo", "currentRoomIndex"]),
+    ...common_vendor.mapGetters(["currentRoom"])
+  },
+  onLoad(options) {
+    common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:105", "S+" + baseInfo);
+    this.roomData = { ...this.currentRoom };
+  },
+  onUnload() {
+    this.saveRoomData();
+  },
   methods: {
-    //删除视频路径
-    deleteFilePath(index) {
-      this.filepath.splice(index, 1);
-    },
-    //点击家具
-    onhouse(index) {
-      this.houseFacilities[index] = !this.houseFacilities[index];
-    },
-    //关闭弹窗
-    successbvideo_close() {
-      this.$refs.success.close("center");
-    },
-    successbvideo_toMap() {
-      this.$refs.success.close("center");
-      common_vendor.index.navigateTo({
-        url: "/pages/map/map"
+    ...common_vendor.mapActions(["saveRoomInfo"]),
+    ...common_vendor.mapMutations(["SET_CURRENT_ROOM_INDEX"]),
+    // 保存当前房间数据
+    saveRoomData() {
+      this.saveRoomInfo({
+        index: this.currentRoomIndex,
+        data: this.roomData
       });
     },
-    //上传视频
-    selectvideo() {
-      common_vendor.wx$1.chooseMedia({
+    // 上一个房间
+    prevRoom() {
+      this.saveRoomData();
+      const prevIndex = this.currentRoomIndex - 1;
+      this.SET_CURRENT_ROOM_INDEX(prevIndex);
+      this.roomData = { ...this.currentRoom };
+      common_vendor.index.redirectTo({
+        url: `/pages/marker/addMarker/NextRoom?index=${prevIndex}`
+      });
+    },
+    // 下一个房间
+    nextRoom() {
+      this.saveRoomData();
+      const nextIndex = this.currentRoomIndex + 1;
+      this.SET_CURRENT_ROOM_INDEX(nextIndex);
+      this.roomData = { ...this.currentRoom };
+      common_vendor.index.redirectTo({
+        url: `/pages/marker/addMarker/NextRoom?index=${nextIndex}`
+      });
+    },
+    // 选择视频
+    selectVideo() {
+      common_vendor.index.chooseMedia({
         count: 3,
         mediaType: ["video"],
-        maxDuration: 60,
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:199", "chooseMedia_Success");
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:200", res.tempFiles[0].size / 1048576);
-          const that = this;
-          that.filepath.push(...res.tempFiles);
-        },
-        fail: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:206", "chooseMedia");
+          const newVideos = res.tempFiles.map((file) => ({
+            name: file.tempFilePath.split("/").pop(),
+            size: file.size,
+            path: file.tempFilePath
+          }));
+          this.roomData.videos = [...this.roomData.videos, ...newVideos];
         }
       });
     },
-    // 选择地图位置
-    chooseLocation() {
-      common_vendor.index.authorize({
-        scope: "scope.userLocation",
+    // 删除视频
+    deleteVideo(index) {
+      this.roomData.videos.splice(index, 1);
+    },
+    // 选择缩略图
+    selectThumbnail() {
+      common_vendor.index.chooseImage({
+        count: 1,
+        success: (res) => {
+          this.roomData.thumbnail = res.tempFilePaths[0];
+        }
+      });
+    },
+    // 切换设施
+    toggleFacility(facility) {
+      const index = this.roomData.facilities.indexOf(facility);
+      if (index === -1) {
+        this.roomData.facilities.push(facility);
+      } else {
+        this.roomData.facilities.splice(index, 1);
+      }
+    },
+    // 提交所有数据
+    submitAll() {
+      this.saveRoomData();
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:203", "所有房间数据:", this.$store.state.rooms);
+      common_vendor.index.showToast({
+        title: "提交成功",
+        icon: "success",
         success: () => {
-          common_vendor.index.chooseLocation({
-            type: "gcj02",
-            success: (res) => {
-              this.locationName = res.name;
-              this.longitude = res.longitude;
-              this.latitude = res.latitude;
-              this.location = res.address;
-            },
-            fail: (err) => {
-              common_vendor.index.showToast({
-                title: "位置选择失败",
-                icon: "none"
-              });
-            }
-          });
-        },
-        fail: () => {
-          common_vendor.index.showModal({
-            title: "权限提示",
-            content: "需要位置权限才能选择地点，请开启权限",
-            confirmText: "去设置",
-            success: (res) => {
-              if (res.confirm) {
-                common_vendor.index.openSetting();
-              }
-            }
+          common_vendor.index.navigateBack({
+            delta: 999
+            // 返回首页
           });
         }
-      });
-    },
-    // 添加支付方式
-    addPaymentOption() {
-      common_vendor.index.showModal({
-        title: "添加支付方式",
-        content: "输入支付方式名称（如：半年付）",
-        editable: true,
-        success: (res) => {
-          if (res.confirm && res.content) {
-            const key = res.content.trim();
-            if (key && !this.paymentOptions[key]) {
-              this.$set(this.paymentOptions, key, 0);
-            }
-          }
-        }
-      });
-    },
-    // 提交房源信息
-    submitHouseInfo() {
-      if (!this.locationName || !this.longitude || !this.latitude) {
-        common_vendor.index.showToast({ title: "请先选择地图位置", icon: "none" });
-        return;
-      }
-      const basicInfoErrors = [];
-      if (!this.title)
-        basicInfoErrors.push("房源标题");
-      if (!this.location)
-        basicInfoErrors.push("具体地点");
-      if (!this.area || isNaN(this.area) || Number(this.area) <= 0) {
-        basicInfoErrors.push("有效面积");
-      }
-      if (!this.houseType)
-        basicInfoErrors.push("房型信息");
-      if (!this.count || isNaN(this.count) || Number(this.count) <= 0) {
-        basicInfoErrors.push("房间数量");
-      }
-      if (basicInfoErrors.length > 0) {
-        common_vendor.index.showToast({
-          title: `请填写${basicInfoErrors.join("、")}`,
-          icon: "none",
-          duration: 3e3
-        });
-        return;
-      }
-      const contactErrors = [];
-      if (!this.wechat && !this.phone) {
-        contactErrors.push("至少填写一种联系方式");
-      }
-      if (this.phone && !/^1[3-9]\d{9}$/.test(this.phone)) {
-        contactErrors.push("手机号格式不正确");
-      }
-      if (contactErrors.length > 0) {
-        common_vendor.index.showToast({
-          title: contactErrors.join("，"),
-          icon: "none",
-          duration: 3e3
-        });
-        return;
-      }
-      const validPayments = Object.values(this.paymentOptions).filter((amount) => amount > 0);
-      if (validPayments.length === 0) {
-        common_vendor.index.showToast({
-          title: "请至少设置一种有效的支付价格",
-          icon: "none",
-          duration: 3e3
-        });
-        return;
-      }
-      if (this.filepath.length === 0) {
-        common_vendor.index.showToast({
-          title: "请至少上传一个视频文件",
-          icon: "none",
-          duration: 3e3
-        });
-        return;
-      }
-      const that = this;
-      for (let i = 0; i < that.filepath.length; i++) {
-        common_vendor.wx$1.cloud.uploadFile({
-          cloudPath: "map/" + this.title + i + ".mp4",
-          filePath: that.filepath[i].tempFilePath,
-          config: {
-            env: "prod-7g3ji5ui73a4702f"
-            // 微信云托管环境ID
-          },
-          success(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:352", "uploadFile_success");
-            that.uid[i] = res2.fileID;
-          },
-          fail(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:358", "uploadFile_fail");
-          }
-        });
-      }
-      const houseData = {
-        longitude: parseFloat(this.longitude),
-        // 改为普通浮点数
-        latitude: parseFloat(this.latitude),
-        // 改为普通浮点数
-        address: this.locationName,
-        title: this.title,
-        location: this.location,
-        // 具体地点
-        area: this.area.toString(),
-        houseType: this.houseType,
-        roomCount: parseInt(this.count),
-        // 转换为整数
-        wechat: this.wechat.toString(),
-        phone: this.phone.toString(),
-        paymentOptions: this.paymentOptions,
-        houseFacilities: this.houseFacilities,
-        videoIds: this.uid
-        // 提取文件路径
-      };
-      const res = common_vendor.wx$1.cloud.callContainer({
-        "config": {
-          "env": "prod-7g3ji5ui73a4702f"
-        },
-        "path": "/api/house/submit",
-        "header": {
-          "X-WX-SERVICE": "springboot-2wum",
-          "content-type": "application/json"
-        },
-        "method": "POST",
-        "data": houseData
-      });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:394", res);
-      res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:397", "API 响应:", response);
-        if (response.statusCode === 200) {
-          if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:403", "操作成功:", response.data.msg);
-            this.msg = response.data.msg;
-            this.$refs.success.open("center");
-          } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:407", "业务错误:", response.data.msg);
-            this.msg = response.data.msg;
-            this.$refs.error.open("center");
-          }
-        } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:412", "HTTP 错误:", response.statusCode);
-        }
-      }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:416", "请求失败:", error);
       });
     }
-    // // 处理支付选项格式
-    // processPaymentOptions() {
-    //   const processed = {};
-    //   for (const [key, value] of Object.entries(this.paymentOptions)) {
-    //     processed[key] = Number(value) || 0;
-    //   }
-    //   return processed;
-    // }
   }
 };
-if (!Array) {
-  const _easycom_uni_popup2 = common_vendor.resolveComponent("uni-popup");
-  const _component_uni_icons = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_popup2 + _component_uni_icons)();
-}
-const _easycom_uni_popup = () => "../../../uni_modules/uni-popup/components/uni-popup/uni-popup.js";
-if (!Math) {
-  _easycom_uni_popup();
-}
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
-    a: common_vendor.o((...args) => $options.chooseLocation && $options.chooseLocation(...args)),
-    b: $data.locationName
-  }, $data.locationName ? {
-    c: common_vendor.t($data.locationName),
-    d: common_vendor.t($data.longitude),
-    e: common_vendor.t($data.latitude)
+    a: common_vendor.t(_ctx.currentRoomIndex + 1),
+    b: common_vendor.t(_ctx.baseInfo.count),
+    c: _ctx.currentRoomIndex > 0
+  }, _ctx.currentRoomIndex > 0 ? {
+    d: common_vendor.o((...args) => $options.prevRoom && $options.prevRoom(...args))
   } : {}, {
-    f: $data.title,
-    g: common_vendor.o(($event) => $data.title = $event.detail.value),
-    h: $data.location,
-    i: common_vendor.o(($event) => $data.location = $event.detail.value),
-    j: $data.area,
-    k: common_vendor.o(($event) => $data.area = $event.detail.value),
-    l: $data.houseType,
-    m: common_vendor.o(($event) => $data.houseType = $event.detail.value),
-    n: $data.count,
-    o: common_vendor.o(($event) => $data.count = $event.detail.value),
-    p: $data.wechat,
-    q: common_vendor.o(($event) => $data.wechat = $event.detail.value),
-    r: $data.phone,
-    s: common_vendor.o(($event) => $data.phone = $event.detail.value),
-    t: common_vendor.f($data.paymentOptions, (value, key, index) => {
+    e: _ctx.currentRoomIndex < _ctx.baseInfo.count - 1
+  }, _ctx.currentRoomIndex < _ctx.baseInfo.count - 1 ? {
+    f: common_vendor.o((...args) => $options.nextRoom && $options.nextRoom(...args))
+  } : {
+    g: common_vendor.o((...args) => $options.submitAll && $options.submitAll(...args))
+  }, {
+    h: $data.roomData.roomNumber,
+    i: common_vendor.o(($event) => $data.roomData.roomNumber = $event.detail.value),
+    j: $data.roomData.roomType,
+    k: common_vendor.o(($event) => $data.roomData.roomType = $event.detail.value),
+    l: common_vendor.o((...args) => $options.selectVideo && $options.selectVideo(...args)),
+    m: common_vendor.f($data.roomData.videos, (video, idx, i0) => {
       return {
-        a: `${key}价格`,
-        b: $data.paymentOptions[key],
-        c: common_vendor.o(($event) => $data.paymentOptions[key] = $event.detail.value, index),
-        d: common_vendor.t(key),
-        e: index
+        a: common_vendor.t(idx + 1),
+        b: common_vendor.t((video.size / 1024 / 1024).toFixed(2)),
+        c: common_vendor.o(($event) => $options.deleteVideo(idx), idx),
+        d: idx
       };
     }),
-    v: common_vendor.f(7, (index, k0, i0) => {
-      return common_vendor.e({
-        a: $data.houseFacilities[index]
-      }, $data.houseFacilities[index] ? {
-        b: common_vendor.t($data.houseName[index - 1]),
-        c: `/static/map/furniture/select/${index}.png`
-      } : {
-        d: common_vendor.t($data.houseName[index - 1]),
-        e: `/static/map/furniture/de/${index}.png`
-      }, {
-        f: common_vendor.o(($event) => $options.onhouse(index), index),
-        g: index
-      });
-    }),
-    w: common_vendor.o((...args) => $options.selectvideo && $options.selectvideo(...args)),
-    x: common_vendor.f($data.filepath, (item, index, i0) => {
+    n: common_vendor.o((...args) => $options.selectThumbnail && $options.selectThumbnail(...args)),
+    o: $data.roomData.thumbnail
+  }, $data.roomData.thumbnail ? {
+    p: $data.roomData.thumbnail
+  } : {}, {
+    q: common_vendor.f($data.facilities, (facility, idx, i0) => {
       return {
-        a: common_vendor.t((item.size / 1048576).toFixed(2)),
-        b: common_vendor.o(($event) => $options.deleteFilePath(index), index),
-        c: index
+        a: common_vendor.t(facility),
+        b: idx,
+        c: $data.roomData.facilities.includes(facility) ? 1 : "",
+        d: common_vendor.o(($event) => $options.toggleFacility(facility), idx)
       };
     }),
-    y: common_assets._imports_0$1,
-    z: common_vendor.t($data.msg),
-    A: common_vendor.o((...args) => $options.successbvideo_close && $options.successbvideo_close(...args)),
-    B: common_vendor.sr("error", "6d1511a3-0"),
-    C: common_vendor.p({
-      type: "bottom",
-      ["border-radius"]: "10px 10px 0 0"
-    }),
-    D: common_assets._imports_1,
-    E: common_vendor.t($data.msg),
-    F: common_vendor.o((...args) => $options.successbvideo_toMap && $options.successbvideo_toMap(...args)),
-    G: common_vendor.sr("success", "6d1511a3-1"),
-    H: common_vendor.p({
-      type: "bottom",
-      ["border-radius"]: "10px 10px 0 0"
-    }),
-    I: common_vendor.p({
-      type: "camera",
-      size: "24"
-    }),
-    J: common_vendor.o(($event) => _ctx.chooseMedia("camera", "image")),
-    K: common_vendor.p({
-      type: "image",
-      size: "24"
-    }),
-    L: common_vendor.o(($event) => _ctx.chooseMedia("album", "image")),
-    M: common_vendor.p({
-      type: "videocam",
-      size: "24"
-    }),
-    N: common_vendor.o(($event) => _ctx.chooseMedia("camera", "video")),
-    O: common_vendor.o((...args) => _ctx.closeMediaPopup && _ctx.closeMediaPopup(...args)),
-    P: common_vendor.sr("mediaPopup", "6d1511a3-2"),
-    Q: common_vendor.p({
-      type: "bottom"
-    }),
-    R: common_vendor.o((...args) => $options.submitHouseInfo && $options.submitHouseInfo(...args))
+    r: $data.roomData.paymentOptions.monthly,
+    s: common_vendor.o(($event) => $data.roomData.paymentOptions.monthly = $event.detail.value),
+    t: $data.roomData.paymentOptions.quarterly,
+    v: common_vendor.o(($event) => $data.roomData.paymentOptions.quarterly = $event.detail.value),
+    w: $data.roomData.paymentOptions.yearly,
+    x: common_vendor.o(($event) => $data.roomData.paymentOptions.yearly = $event.detail.value)
   });
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);
