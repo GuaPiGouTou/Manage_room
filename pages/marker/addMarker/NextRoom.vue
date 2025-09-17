@@ -5,6 +5,7 @@
     <!-- 房源基本信息 -->
     <view class="section">
       <view class="section-title">房间信息</view>
+	   <view class="section-title">房间数：{{roomCount}}/{{MaxCount}}</view>
       <input class="input" placeholder="房间号" v-model="title" />
       <input class="input" placeholder="具体地址" v-model="location" />
       <input class="input" placeholder="面积（平方米）" v-model="area" />
@@ -49,12 +50,44 @@
       <button class="location-btn" @tap="selectvideo">
         <text>上传视频</text>
       </button>
-	  <view v-for="(item,index) in filepath" :key="index">
-		  <view style="display: flex;flex-direction: row; width: 200px;">
-		   <text>{{(item.size/1048576).toFixed(2)}}MB</text> 
-		   <button @click="deleteFilePath(index)" type="warn">删除</button>
-		   </view>
-	  </view>
+	
+	
+	 <view style="display: flex; flex-wrap: wrap; padding: 10px;">
+	   <view 
+	     v-for="(item,index) in filepath" 
+	     :key="index" 
+	     style="width: 40%; margin: 0 5% 10px 5%;"
+	   >
+	     <image 
+	       :src="item.thumbTempFilePath" 
+	       mode="scaleToFill" 
+	       style="width: 100%; height: 100px; background-color: #f5f5f5; border-radius: 4px;" 
+	     />
+	     
+	     <view style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+	       <text style="font-size: 12px; color: #666;">
+	         {{(item.size/1048576).toFixed(2)}}MB
+	       </text>
+	       
+	       <button 
+	         @click="deleteFilePath(index)" 
+	         type="warn" 
+	         style="
+	           width: 80px; 
+	           height: 30px; 
+	           padding: 0;
+	           display: flex;
+	           justify-content: center;
+	           align-items: center;
+	           font-size: 12px;
+	           border-radius: 4px;
+	         ">
+	         删除
+	       </button>
+	     </view>
+	   </view>
+	 </view>
+	  
 	
 		<uni-popup ref="error" type="bottom" border-radius="10px 10px 0 0">
 			<view class="prop">
@@ -77,7 +110,7 @@
     </view>
 
 	<!-- 媒体类型选择 -->
-	    <uni-popup ref="mediaPopup" type="bottom">
+	 <!--   <uni-popup ref="mediaPopup" type="bottom">
 	      <view class="media-actions">
 	        <view class="action-item" @tap="chooseMedia('camera', 'image')">
 	          <uni-icons type="camera" size="24"></uni-icons>
@@ -95,9 +128,11 @@
 	          <text>取消</text>
 	        </view>
 	      </view>
-	    </uni-popup>
+	    </uni-popup> -->
     <!-- 提交按钮 -->
-    <button class="submit-btn" @tap="submitHouseInfo">提交房源信息</button>
+    <!-- <button class="submit-btn" @tap="submitHouseInfo">提交房源信息</button> --> 
+	<!-- 下一个房间页面按钮 -->
+    <button class="submit-btn" @tap="NextRoom">下一个房间</button>
   </view>
 </template>
 
@@ -105,6 +140,9 @@
   export default {
     data() {
       return {
+		  videoThumb:[],
+		  MaxCount:0,
+		  roomCount:0,
         // 位置信息
         locationName: '',
         longitude: 0,
@@ -137,7 +175,16 @@
         }
       }
     },
+	onLoad() {
+		this.roomCount =  this.$store.state.currentRoomIndex
+		this.MaxCount  =  this.$store.state.baseInfo.count
+	
+	},
     methods: {
+		//跳转下一个房间
+		NextRoom(){
+			this.$store.commit('SET_CURRENT_ROOM_INDEX',this.roomCount+1)
+		},
 		//删除视频路径
 		deleteFilePath(index){
 			this.filepath.splice(index, 1)
@@ -158,27 +205,30 @@
 		},
 		//上传视频
 		selectvideo(){
-			// 将视频选择完毕后的路径保存并展示出
-			var flag  = true
-			wx.chooseMedia({
-				count:3,
-				mediaType:["video"],
-				maxDuration:60,
-				success:(res)=> {
-					console.log("chooseMedia_Success")
-					console.log(res.tempFiles[0].size/1048576)
-					const that = this;
-					that.filepath.push(...res.tempFiles)
+			if(filepath.length<3)
+			{
+				// 将视频选择完毕后的路径保存并展示出
+				var flag  = true
+				wx.chooseMedia({
+					count:3,
+					mediaType:["video"],
+					maxDuration:60,
+					success:(res)=> {
+						console.log("chooseMedia_Success")
+						console.log(res.tempFiles[0].size/1048576)
+						this.filepath.push(...res.tempFiles)
+						
+					},
+					fail:(res)=>{
+						console.log("chooseMedia")
+						flag=false	
+					}
+				})
+				if(flag){
 					
-				},
-				fail:(res)=>{
-					console.log("chooseMedia")
-					flag=false	
 				}
-			})
-			if(flag){
-				
 			}
+			
 		},
       // 选择地图位置
       chooseLocation() {

@@ -3,6 +3,17 @@ const common_vendor = require("../../../common/vendor.js");
 const _sfc_main = {
   data() {
     return {
+      MarkerData: {
+        locationName: "",
+        longitude: 0,
+        latitude: 0,
+        wechat: "",
+        phone: "",
+        title: "",
+        location: "",
+        area: "",
+        count: 0
+      },
       // 位置信息
       locationName: "s",
       longitude: 0,
@@ -34,20 +45,24 @@ const _sfc_main = {
       }
     };
   },
+  onLoad() {
+    this.MarkerData = this.$store.state.baseInfo;
+  },
   computed: {
-    ...common_vendor.mapState(["baseInfo"])
+    // ...mapState(['baseInfo'])
   },
-  watch: {
-    // 监听基本信息变化并保存到Vuex
-    baseInfo: {
-      deep: true,
-      handler(newVal) {
-        this.$store.dispatch("saveBaseInfo", newVal);
-      }
-    }
-  },
+  // watch: {
+  //     // 监听基本信息变化并保存到Vuex
+  //     baseInfo: {
+  //       deep: true,
+  //       handler(newVal) {
+  //         this.$store.dispatch('saveBaseInfo',newVal)
+  //       }
+  //     }
+  //   },
   //页面卸载时
   onUnload() {
+    this.$store.commit("UPDATE_BASE_INFO", this.MarkerData);
   },
   methods: {
     nextroom() {
@@ -80,13 +95,13 @@ const _sfc_main = {
         mediaType: ["video"],
         maxDuration: 60,
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:133", "chooseMedia_Success");
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:134", res.tempFiles[0].size / 1048576);
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:152", "chooseMedia_Success");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:153", res.tempFiles[0].size / 1048576);
           const that = this;
           that.filepath.push(...res.tempFiles);
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:140", "chooseMedia");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:159", "chooseMedia");
         }
       });
     },
@@ -210,11 +225,11 @@ const _sfc_main = {
             // 微信云托管环境ID
           },
           success(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:286", "uploadFile_success");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:305", "uploadFile_success");
             that.uid[i] = res2.fileID;
           },
           fail(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:292", "uploadFile_fail");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:311", "uploadFile_fail");
           }
         });
       }
@@ -250,24 +265,24 @@ const _sfc_main = {
         "method": "POST",
         "data": houseData
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:328", res);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:347", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:331", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:350", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:337", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:356", "操作成功:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:341", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:360", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:346", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:365", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:350", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:369", "请求失败:", error);
       });
     }
     // // 处理支付选项格式
@@ -285,22 +300,22 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     a: common_vendor.o((...args) => $options.chooseLocation && $options.chooseLocation(...args)),
     b: $data.locationName
   }, $data.locationName ? {
-    c: common_vendor.t(_ctx.baseInfo.locationName),
-    d: common_vendor.t(_ctx.baseInfo.longitude),
-    e: common_vendor.t(_ctx.baseInfo.latitude)
+    c: common_vendor.t($data.MarkerData.locationName),
+    d: common_vendor.t($data.MarkerData.longitude),
+    e: common_vendor.t($data.MarkerData.latitude)
   } : {}, {
-    f: _ctx.baseInfo.wechat,
-    g: common_vendor.o(($event) => _ctx.baseInfo.wechat = $event.detail.value),
-    h: _ctx.baseInfo.phone,
-    i: common_vendor.o(($event) => _ctx.baseInfo.phone = $event.detail.value),
-    j: _ctx.baseInfo.title,
-    k: common_vendor.o(($event) => _ctx.baseInfo.title = $event.detail.value),
-    l: _ctx.baseInfo.location,
-    m: common_vendor.o(($event) => _ctx.baseInfo.location = $event.detail.value),
-    n: _ctx.baseInfo.area,
-    o: common_vendor.o(($event) => _ctx.baseInfo.area = $event.detail.value),
-    p: _ctx.baseInfo.count,
-    q: common_vendor.o(($event) => _ctx.baseInfo.count = $event.detail.value),
+    f: $data.MarkerData.wechat,
+    g: common_vendor.o(($event) => $data.MarkerData.wechat = $event.detail.value),
+    h: $data.MarkerData.phone,
+    i: common_vendor.o(($event) => $data.MarkerData.phone = $event.detail.value),
+    j: $data.MarkerData.title,
+    k: common_vendor.o(($event) => $data.MarkerData.title = $event.detail.value),
+    l: $data.MarkerData.location,
+    m: common_vendor.o(($event) => $data.MarkerData.location = $event.detail.value),
+    n: $data.MarkerData.area,
+    o: common_vendor.o(($event) => $data.MarkerData.area = $event.detail.value),
+    p: $data.MarkerData.count,
+    q: common_vendor.o(($event) => $data.MarkerData.count = $event.detail.value),
     r: common_vendor.o((...args) => $options.nextroom && $options.nextroom(...args))
   });
 }
