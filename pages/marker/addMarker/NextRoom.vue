@@ -5,18 +5,18 @@
     <!-- 房源基本信息 -->
     <view class="section">
       <view class="section-title">房间信息</view>
-	   <view class="section-title">房间数：{{roomCount}}/{{MaxCount}}</view>
-      <input class="input" placeholder="房间号" v-model="title" />
-      <input class="input" placeholder="具体地址" v-model="location" />
-      <input class="input" placeholder="面积（平方米）" v-model="area" />
-      <input class="input" placeholder="房型（如：2室1厅）" v-model="houseType" />
+	   <view class="section-title">房间数：{{roomCount+1}}/{{MaxCount}}</view>
+      <input class="input" placeholder="房间号" v-model="roomdata.RoomNumber" />
+      <input class="input" placeholder="具体地址" v-model="roomdata.RoomAddress" />
+      <input class="input" placeholder="面积（平方米）" v-model="roomdata.RoomArea" />
+      <input class="input" placeholder="房型（如：2室1厅）" v-model="roomdata.RoomType" />
     </view>
 
     <!-- 支付选项 -->
     <view class="section">
       <view class="section-title">支付选项</view>
-      <view v-for="(value, key, index) in paymentOptions" :key="index" class="payment-item">
-        <input class="payment-input" type="number" :placeholder="`${key}价格`" v-model="paymentOptions[key]" />
+      <view v-for="(value, key, index) in roomdata.RoomPayment" :key="index" class="payment-item">
+        <input class="payment-input" type="number" :placeholder="`${key}价格`" v-model="roomdata.RoomPayment[key]" />
         <text class="payment-label">{{key}}</text>
       </view>
       <!-- <button class="add-payment" @tap="addPaymentOption">+ 添加支付方式</button> -->
@@ -27,7 +27,7 @@
 		<view  class="houseclass"  >
 			<view v-for="index in 7" :key="index"	>
 				<view @click="onhouse(index)" >
-					<view class="houseitem" v-if="houseFacilities[index]">
+					<view class="houseitem" v-if="roomdata.RoomFurniture[index]">
 					<text style="color: #4db0e4;">{{houseName[index-1]}}</text>
 					<image style="width: 80rpx; height: 100rpx;"  :src="`/static/map/furniture/select/${index}.png`"  ></image>
 					</view>
@@ -109,30 +109,11 @@
 		
     </view>
 
-	<!-- 媒体类型选择 -->
-	 <!--   <uni-popup ref="mediaPopup" type="bottom">
-	      <view class="media-actions">
-	        <view class="action-item" @tap="chooseMedia('camera', 'image')">
-	          <uni-icons type="camera" size="24"></uni-icons>
-	          <text>拍摄照片</text>
-	        </view>
-	        <view class="action-item" @tap="chooseMedia('album', 'image')">
-	          <uni-icons type="image" size="24"></uni-icons>
-	          <text>相册选图</text>
-	        </view>
-	        <view class="action-item" @tap="chooseMedia('camera', 'video')">
-	          <uni-icons type="videocam" size="24"></uni-icons>
-	          <text>拍摄视频</text>
-	        </view>
-	        <view class="action-item cancel" @tap="closeMediaPopup">
-	          <text>取消</text>
-	        </view>
-	      </view>
-	    </uni-popup> -->
-    <!-- 提交按钮 -->
-    <!-- <button class="submit-btn" @tap="submitHouseInfo">提交房源信息</button> --> 
 	<!-- 下一个房间页面按钮 -->
-    <button class="submit-btn" @tap="NextRoom">下一个房间</button>
+	
+    <button  v-if="roomCount+1-MaxCount==0" class="submit-btn" @tap="NextRoom">提交信息</button>
+    <button  v-else class="submit-btn" @tap="NextRoom">下一步</button>
+    <button class="submit-btn" @tap="ReturnRoom">上一步</button>
   </view>
 </template>
 
@@ -140,50 +121,94 @@
   export default {
     data() {
       return {
-		  videoThumb:[],
-		  MaxCount:0,
-		  roomCount:0,
-        // 位置信息
-        locationName: '',
-        longitude: 0,
-        latitude: 0,
-		//视频信息
-        msg:"成功上传",
-		uid:[],
-		filepath:[],
-        // 房源基本信息
-        swiperIds: [],
-        title: '',
-        videoId: '',
-        location: '',
-        area: '',
-        houseType: '',
-        count: 0,
-        
-        // 设施信息
-        houseFacilities: [false, false, false, false,false,false,false], // 空调,洗衣机,冰箱,厨房
+		  roomdata:{
+			  RoomNumber:'',
+			  RoomAddress: '',        
+			  RoomArea: '',
+			  RoomType: '',
+			  RoomPayment:{
+				  '月付': 0,
+				  '半年付': 0,
+				  '年付': 0
+				},
+			  RoomFurniture:  [false, false, false, false,false,false,false],
+			  RoomVideo: []// 提取文件路径
+		  },
+		roomCount:null,
+		MaxCount:null,
         houseName:["浴缸","花洒","冰箱","空调","微波炉","洗衣机","油烟机"],
-        // 联系方式
-        wechat: '',
-        phone: '',
-        
-        // 支付选项
-        paymentOptions: {
-          '月付': 0,
-          '半年付': 0,
-          '年付': 0
-        }
+		filepath:null,
+		msg:null
       }
     },
 	onLoad() {
 		this.roomCount =  this.$store.state.currentRoomIndex
 		this.MaxCount  =  this.$store.state.baseInfo.count
+		console.log("onLoad")
+		console.log(this.$store.state.rooms)
+		if(this.$store.state.rooms[this.roomCount] !=null)
+		{
+			this.roomdata  =  this.$store.state.rooms[this.roomCount]  
+			
+		}
+		
+	},
+	onUnload() {
+		// 准备提交给后端的数据
+			// console.log("houseData")
+		 // const houseData = {
+		 //   RoomNumber: this.roomdata.RoomNumber, 
+		 //   RoomAddress: this.roomdata.RoomAddress,          
+		 //   RoomArea: this.roomdata.RoomArea,
+		 //   RoomType: this.roomdata.RoomType,
+		 //   RoomPayment: this.roomdata.RoomPayment,
+		 //   RoomFurniture: this.roomdata.RoomFurniture,
+		 //   RoomVideo: this.uid // 提取文件路径
+		 // };
+		 console.log(this.roomdata)
+		 if(this.roomdata.RoomNumber.trim()!=null||this.roomdata.RoomAddress.trim()!=null||this.roomdata.RoomType.trim()!=null)
+		 {
+			 	this.$store.commit('UPDATE_ROOM',{index:this.roomCount,data:this.roomdata})
+		 }
 	
 	},
     methods: {
+		//跳转上一个房间
+		ReturnRoom(){
+		if(this.roomCount+1>1)
+		{
+			this.$store.commit('SET_CURRENT_ROOM_INDEX',this.roomCount-1)
+			uni.redirectTo({
+				url:"/pages/marker/addMarker/NextRoom"
+			})
+		}else{
+			uni.redirectTo({
+				url:"/pages/marker/addMarker/addMarker"
+			})
+		}
+		
+		},
 		//跳转下一个房间
 		NextRoom(){
-			this.$store.commit('SET_CURRENT_ROOM_INDEX',this.roomCount+1)
+			if(this.roomCount+1<this.MaxCount)
+			{	console.log(this.roomdata)
+				if(this.roomdata.RoomNumber.trim()!=null&&this.roomdata.RoomAddress.trim()!=null&&this.roomdata.RoomType.trim())
+				{
+				
+					this.$store.commit('SET_CURRENT_ROOM_INDEX',this.roomCount+1)
+					uni.redirectTo({
+						url:"/pages/marker/addMarker/NextRoom"
+					})
+				}else{
+					this.msg = "当前房间未完成填写"
+					this.$refs.error.open("center")
+				}
+				
+			}else{
+				this.msg = "当前房间已经为最后一个房间！"
+				this.$refs.error.open("center")
+			}
+			
 		},
 		//删除视频路径
 		deleteFilePath(index){
@@ -191,11 +216,11 @@
 		},
 		//点击家具
 		onhouse(index){
-			this.houseFacilities[index] = !this.houseFacilities[index];
+			this.roomdata.RoomFurniture[index] = !this.roomdata.RoomFurniture[index];
 		},
 		//关闭弹窗
 		successbvideo_close(){
-			 this.$refs.success.close('center');
+			 this.$refs.error.close('center');
 		},
 		successbvideo_toMap(){
 			 this.$refs.success.close('center');
@@ -238,7 +263,7 @@
             uni.chooseLocation({
               type: 'gcj02',
               success: (res) => {
-                this.locationName = res.name;
+                this.RoomAddress = res.name;
                 this.longitude = res.longitude;
                 this.latitude = res.latitude;
                 
@@ -278,8 +303,8 @@
           success: (res) => {
             if (res.confirm && res.content) {
               const key = res.content.trim();
-              if (key && !this.paymentOptions[key]) {
-                this.$set(this.paymentOptions, key, 0);
+              if (key && !this.RoomFurniture[key]) {
+                this.$set(this.RoomFurniture, key, 0);
               }
             }
           }
@@ -290,7 +315,7 @@
       submitHouseInfo() {
 		  
 		  // 1. 位置信息验证
-		   if (!this.locationName || !this.longitude || !this.latitude) {
+		   if (!this.RoomAddress || !this.longitude || !this.latitude) {
 		     uni.showToast({ title: '请先选择地图位置', icon: 'none' });
 		     return;
 		   }
@@ -302,7 +327,7 @@
 		   if (!this.area || isNaN(this.area) || Number(this.area) <= 0) {
 		     basicInfoErrors.push('有效面积');
 		   }
-		   if (!this.houseType) basicInfoErrors.push('房型信息');
+		   if (!this.RoomType) basicInfoErrors.push('房型信息');
 		   if (!this.count || isNaN(this.count) || Number(this.count) <= 0) {
 		     basicInfoErrors.push('房间数量');
 		   }
@@ -335,7 +360,7 @@
 		   }
 		 
 		   // 4. 支付选项验证
-		   const validPayments = Object.values(this.paymentOptions)
+		   const validPayments = Object.values(this.RoomFurniture)
 		     .filter(amount => amount > 0);
 		   
 		   if (validPayments.length === 0) {
@@ -384,16 +409,16 @@
 			  const houseData = {
 			    longitude: parseFloat(this.longitude), // 改为普通浮点数
 			    latitude: parseFloat(this.latitude),   // 改为普通浮点数
-			    address: this.locationName,          
+			    address: this.RoomAddress,          
 			    title: this.title,
 			    location: this.location,        // 具体地点
 			    area: this.area.toString(),
-			    houseType: this.houseType,
+			    RoomType: this.RoomType,
 			    roomCount: parseInt(this.count), // 转换为整数
 			    wechat: this.wechat.toString(),
 			    phone: this.phone.toString(),
-			    paymentOptions: this.paymentOptions,
-			    houseFacilities: this.houseFacilities,
+			    RoomFurniture: this.RoomFurniture,
+			    RoomFurniture: this.RoomFurniture,
 			    videoIds: this.uid // 提取文件路径
 			  };
 			  // console.log(houseData)
@@ -437,9 +462,9 @@
 			});
       },
       // // 处理支付选项格式
-      // processPaymentOptions() {
+      // processRoomFurniture() {
       //   const processed = {};
-      //   for (const [key, value] of Object.entries(this.paymentOptions)) {
+      //   for (const [key, value] of Object.entries(this.RoomFurniture)) {
       //     processed[key] = Number(value) || 0;
       //   }
       //   return processed;

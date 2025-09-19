@@ -1,0 +1,10 @@
+## 开发日志
+
+### 2025-9-19
+
+1.完成addMarker父页面到NextRoom子页面的状态关联，房源信息和房间信息关联
+
+2.完成NextRoom页面数量对应addMarker中房间数量
+
+3.完成NextRoom页面数据对应state的rooms数组一一对应
+

@@ -36,12 +36,13 @@ const store = createStore({
           newRooms.push(state.rooms[i])
         } else {
           newRooms.push({
-            roomNumber: '',
-            roomType: '',
-            videos: [],
-            thumbnail: null,
-            facilities: [],
-            paymentOptions: {
+            RoomNumber: '',
+            RoomAddress: '',
+            RoomArea: null,
+            RoomType: '',
+            RoomFurniture: [],
+            RoomVideo: [],
+            RoomPayment: {
               monthly: '',
               quarterly: '',
               yearly: ''
@@ -50,13 +51,14 @@ const store = createStore({
         }
       }
       state.rooms = newRooms
+	  console.log("INIT_ROOMS")
       // 同步到本地存储
       uni.setStorageSync('rooms', state.rooms)
     },
     
     // 更新房间信息
-    UPDATE_ROOM(state, { index, data }) {
-      Vue.set(state.rooms, index, { ...state.rooms[index], ...data })
+    UPDATE_ROOM(state,  {index, data} ) {
+      state.rooms[index] = { ...data }
       // 同步到本地存储
       uni.setStorageSync('rooms', state.rooms)
     },

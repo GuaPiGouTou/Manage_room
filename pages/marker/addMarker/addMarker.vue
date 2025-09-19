@@ -113,11 +113,11 @@
 	onUnload(){
 		//将MarkerData提交到store中
 		this.$store.commit('UPDATE_BASE_INFO',this.MarkerData)
+		
 	},
     methods: {
 		nextroom(){
-		
-			 // this.$store.dispatch('saveBaseInfo',baseInfo)
+			this.$store.commit('SET_CURRENT_ROOM_INDEX',0)
 			uni.navigateTo({
 				url:"/pages/marker/addMarker/NextRoom"
 			})
