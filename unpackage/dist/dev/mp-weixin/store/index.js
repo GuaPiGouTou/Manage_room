@@ -4,7 +4,7 @@ const store = common_vendor.createStore({
   state: {
     // 房源基本信息
     baseInfo: {
-      locationName: "NULL",
+      locationName: "",
       longitude: 0,
       latitude: 0,
       wechat: "",
@@ -12,7 +12,8 @@ const store = common_vendor.createStore({
       title: "",
       location: "",
       area: "",
-      count: 10
+      count: 0,
+      room: []
     },
     // 房间信息数组
     rooms: [],
@@ -33,12 +34,13 @@ const store = common_vendor.createStore({
           newRooms.push(state.rooms[i]);
         } else {
           newRooms.push({
-            roomNumber: "",
-            roomType: "",
-            videos: [],
-            thumbnail: null,
-            facilities: [],
-            paymentOptions: {
+            RoomNumber: "",
+            RoomAddress: "",
+            RoomArea: null,
+            RoomType: "",
+            RoomFurniture: [],
+            RoomVideo: [],
+            RoomPayment: {
               monthly: "",
               quarterly: "",
               yearly: ""
@@ -47,11 +49,12 @@ const store = common_vendor.createStore({
         }
       }
       state.rooms = newRooms;
+      common_vendor.index.__f__("log", "at store/index.js:55", "INIT_ROOMS");
       common_vendor.index.setStorageSync("rooms", state.rooms);
     },
     // 更新房间信息
     UPDATE_ROOM(state, { index, data }) {
-      Vue.set(state.rooms, index, { ...state.rooms[index], ...data });
+      state.rooms[index] = { ...data };
       common_vendor.index.setStorageSync("rooms", state.rooms);
     },
     // 设置当前房间索引

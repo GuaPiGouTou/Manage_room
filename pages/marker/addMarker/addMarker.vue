@@ -117,10 +117,19 @@
 	},
     methods: {
 		nextroom(){
-			this.$store.commit('SET_CURRENT_ROOM_INDEX',0)
-			uni.navigateTo({
-				url:"/pages/marker/addMarker/NextRoom"
-			})
+			if(this.$store.state.baseInfo.count!=0)
+			{
+				this.$store.commit('SET_CURRENT_ROOM_INDEX',0)
+				uni.navigateTo({
+					url:"/pages/marker/addMarker/NextRoom"
+				})
+			}else{
+				uni.showToast({
+					icon:'none',
+					title:"当前房间数为0"
+				})
+			}
+			
 		},
 		//删除视频路径
 		deleteFilePath(index){
@@ -172,12 +181,10 @@
             uni.chooseLocation({
               type: 'gcj02',
               success: (res) => {
-                this.locationName = res.name;
-                this.longitude = res.longitude;
-                this.latitude = res.latitude;
+                this.MarkerData.locationName = res.name;
+                this.MarkerData.longitude = res.longitude;
+                this.MarkerData.latitude = res.latitude;
                 
-                // 自动填充具体地点
-                  this.location = res.address;
                 
               },
               fail: (err) => {

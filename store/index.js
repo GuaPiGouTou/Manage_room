@@ -4,7 +4,7 @@ const store = createStore({
   state: {
     // 房源基本信息
     baseInfo: {
-      locationName: 'NULL',
+      locationName: '',
       longitude: 0,
       latitude: 0,
       wechat: '',
@@ -12,7 +12,8 @@ const store = createStore({
       title: '',
       location: '',
       area: '',
-      count: 10
+      count: 0,
+	  room:[]
     },
     // 房间信息数组
     rooms: [],

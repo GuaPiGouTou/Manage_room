@@ -66,9 +66,17 @@ const _sfc_main = {
   },
   methods: {
     nextroom() {
-      common_vendor.index.navigateTo({
-        url: "/pages/marker/addMarker/NextRoom"
-      });
+      if (this.$store.state.baseInfo.count != 0) {
+        this.$store.commit("SET_CURRENT_ROOM_INDEX", 0);
+        common_vendor.index.navigateTo({
+          url: "/pages/marker/addMarker/NextRoom"
+        });
+      } else {
+        common_vendor.index.showToast({
+          icon: "none",
+          title: "当前房间数为0"
+        });
+      }
     },
     //删除视频路径
     deleteFilePath(index) {
@@ -95,13 +103,13 @@ const _sfc_main = {
         mediaType: ["video"],
         maxDuration: 60,
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:152", "chooseMedia_Success");
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:153", res.tempFiles[0].size / 1048576);
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:161", "chooseMedia_Success");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:162", res.tempFiles[0].size / 1048576);
           const that = this;
           that.filepath.push(...res.tempFiles);
         },
         fail: (res) => {
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:159", "chooseMedia");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:168", "chooseMedia");
         }
       });
     },
@@ -113,10 +121,9 @@ const _sfc_main = {
           common_vendor.index.chooseLocation({
             type: "gcj02",
             success: (res) => {
-              this.locationName = res.name;
-              this.longitude = res.longitude;
-              this.latitude = res.latitude;
-              this.location = res.address;
+              this.MarkerData.locationName = res.name;
+              this.MarkerData.longitude = res.longitude;
+              this.MarkerData.latitude = res.latitude;
             },
             fail: (err) => {
               common_vendor.index.showToast({
@@ -225,11 +232,11 @@ const _sfc_main = {
             // 微信云托管环境ID
           },
           success(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:305", "uploadFile_success");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:312", "uploadFile_success");
             that.uid[i] = res2.fileID;
           },
           fail(res2) {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:311", "uploadFile_fail");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:318", "uploadFile_fail");
           }
         });
       }
@@ -265,24 +272,24 @@ const _sfc_main = {
         "method": "POST",
         "data": houseData
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:347", res);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:354", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:350", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:357", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:356", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/addMarker.vue:363", "操作成功:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:360", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:367", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:365", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:372", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:369", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/addMarker/addMarker.vue:376", "请求失败:", error);
       });
     }
     // // 处理支付选项格式

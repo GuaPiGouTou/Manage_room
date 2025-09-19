@@ -27,14 +27,14 @@
 			"path" : "pages/marker/addMarker/addMarker",
 			"style" : 
 			{
-				"navigationBarTitleText" : ""
+				"navigationBarTitleText" : "房源信息"
 			}
 		},
 		{
 			"path" : "pages/marker/addMarker/NextRoom",
 			"style" : 
 			{
-				"navigationBarTitleText" : ""
+				"navigationBarTitleText" : "房间信息"
 			}
 		}
 	],
