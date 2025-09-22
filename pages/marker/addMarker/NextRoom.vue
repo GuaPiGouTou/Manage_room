@@ -300,164 +300,245 @@
           }
         });
       },
-      
+      //上传标志位状态更改
+	  setsubmitflag(){
+		this.submitflag = !this.submitflag
+	  },
+	  
       // 提交房源信息
-      submitHouseInfo() {
+       submitHouseInfo() {
 		  
 		  const housedata  = this.$store.state.baseInfo
 		 
 		  // 1. 位置信息验证
 		   if (!housedata.locationName || !housedata.longitude || !housedata.latitude) {
-		     uni.showToast({ title: '房源信息中未选择地图位置', icon: 'none' });
+		     uni.showToast({ 
+				title: '房源信息中未选择地图位置',
+				icon:'none',
+				duration:3000});
 		     return;
 		   }
+		 // 2. 联系方式验证
 		 
-		   // 2. 房源基本信息验证
+		 if (!housedata.wechat && !housedata.phone) {
+		     uni.showToast({ title: '房源信息至少填写一种联系方式', icon: 'none' });
+		 			   return;
+		 }
+		 if (housedata.phone && !/^1[3-9]\d{9}$/.test(housedata.phone)) {
+		      uni.showToast({ title: '手机号格式不正确', icon: 'none' });
+		 				return;
+		 }
+		   // 3. 房源基本信息验证
 		   if (!housedata.title.trim())
 		   {
-			   uni.showToast({ title: '房源信息中未填写标题', icon: 'none' });
+			   uni.showToast({ title: '房源信息中未填写标题', icon: 'none',duration:3000 });
+			   return;
 		   }
 		   if (!housedata.location.trim()){
 			   uni.showToast({ title: '房源信息中未填写具体地点', icon: 'none' });
+			   return;
 		   }
 		   if (!housedata.area.trim()) {
 		       uni.showToast({ title: '房源信息中未填写面积', icon: 'none' });
+			   return;
 		   }
 	
-		   // 3. 联系方式验证
-		   
-		   if (!housedata.wechat && !housedata.phone) {
-		       uni.showToast({ title: '房源信息至少填写一种联系方式', icon: 'none' });
-		   }
-		   if (housedata.phone && !/^1[3-9]\d{9}$/.test(housedata.phone)) {
-		        uni.showToast({ title: '手机号格式不正确', icon: 'none' });
-		   }
+		  
 		   const rooms = this.$store.state.rooms
-		   if(this.roomdata.RoomNumber.trim()!=null||this.roomdata.RoomAddress.trim()!=null||this.roomdata.RoomType.trim()!=null)
+		   if(this.roomdata.RoomNumber.trim()!=''&&this.roomdata.RoomAddress.trim()!=''&&this.roomdata.RoomType.trim()!='')
 		   {
 		   			 	this.$store.commit('UPDATE_ROOM',{index:this.roomCount,data:this.roomdata})
+		   }else{
+			   uni.showToast({
+			   	title:"房间信息不能为空",
+				icon:'none',
+				duration:3000
+			   });
+			   return;
 		   }
-		   if(!this.submitflag)
-		   {
-			   housedata.room.push(...rooms)
+		   
+		   //4.支付选项验证
+		   for (var i = 0; i < rooms.length; i++) {
+		   	const validPayments = Object.values(rooms[i].RoomPayment)
+		   	  .filter(amount => amount > 0);
+		   	
+		   	if (validPayments.length === 0) {
+		   	  uni.showToast({
+		   		title: '请至少设置一种有效的支付价格',
+		   		icon: 'none',
+		   		duration: 3000
+		   	  });
+		   	  return;
+		   	}
 		   }
+		     
+
+		   housedata.room = rooms
+		
+			   
+		 
 		   
 		   console.log(rooms)
 		   console.log(housedata)
 		 
-
-		 //  //视频上传
-		  const that = this;
-		  for(let j =0;j<housedata.room.length;j++)
-		  {
-			for(let i = 0;i<housedata.room[j].roomRoomVideo.length;i++)
-			{
-				wx.cloud.uploadFile({
-				cloudPath:"map/"+housedata.title+i+".mp4",
-				filePath:housedata.room[j].roomRoomVideo[i],
-				 config: {
-					env: 'prod-7g3ji5ui73a4702f' // 微信云托管环境ID
-				  },
-				  success(res){
-						console.log("uploadFile_success")
-						
-					  housedata.room[j].roomRoomVideo[i]  = res.fileID
+		
+		 //5.视频上传
+		 //  const uploadPromises = [];
+		 //  for(let j =0;j<housedata.room.length;j++)
+		 //  {
+			// for(let i = 0;i<housedata.room[j].roomRoomVideo.length;i++)
+			// {
 				
-				  },
-					fail(res){
-						console.log("uploadFile_fail")
-						
-						}
+			// 	wx.cloud.uploadFile({
+			// 		cloudPath:"map/"+housedata.title+i+".mp4",
+			// 		filePath:housedata.room[j].roomRoomVideo[i],
+			// 		 config: {
+			// 			env: 'prod-7g3ji5ui73a4702f' // 微信云托管环境ID
+			// 		  },
+			// 		  success(res){
+			// 				console.log("uploadFile_success")
+							
+			// 			  housedata.room[j].roomRoomVideo[i]  = res.fileID
+					
+			// 		  },
+			// 			fail(res){
+			// 				console.log("uploadFile_fail")
+			// 				uni.showToast({
+			// 					title:"视频上传失败",
+			// 					icon:'none'
+			// 				})
+							
+			// 				}
+			// 	})	
+				
+				
+			// }  
+		 //  }
+		   this.handleVideoUpload()
+		      .then(() => {
+		        // 上传成功后的同步验证
+		        if (this.$store.state.rooms.some(room => !room.RoomVideo.length)) {
+		          throw new Error('请为每个房间至少上传一个视频');
+				  return;
+		        }
 			})	
-			}  
-		  }
 			
-			//   // 4. 支付选项验证
-			//   const validPayments = Object.values(this.RoomFurniture)
-			//     .filter(amount => amount > 0);
-			  
-			//   if (validPayments.length === 0) {
-			//     uni.showToast({
-			//       title: '请至少设置一种有效的支付价格',
-			//       icon: 'none',
-			//       duration: 3000
-			//     });
-			//     return;
-			//   }
+			// 6. 媒体文件验证
+			if (rooms.RoomVideo.length === 0) {
+			  uni.showToast({
+			    title: '请至少上传一个视频文件',
+			    icon: 'none',
+			    duration: 3000
+			  });
+			  return;
+			}
 			
-			//   // 5. 媒体文件验证
-			//   if (this.filepath.length === 0) {
-			//     uni.showToast({
-			//       title: '请至少上传一个视频文件',
-			//       icon: 'none',
-			//       duration: 3000
-			//     });
-			//     return;
-			//   }
-			//  // 准备提交给后端的数据
-			//   const houseData = {
-			//     longitude: parseFloat(this.longitude), // 改为普通浮点数
-			//     latitude: parseFloat(this.latitude),   // 改为普通浮点数
-			//     address: this.RoomAddress,          
-			//     title: this.title,
-			//     location: this.location,        // 具体地点
-			//     area: this.area.toString(),
-			//     RoomType: this.RoomType,
-			//     roomCount: parseInt(this.count), // 转换为整数
-			//     wechat: this.wechat.toString(),
-			//     phone: this.phone.toString(),
-			//     RoomFurniture: this.RoomFurniture,
-			//     RoomFurniture: this.RoomFurniture,
-			//     videoIds: this.uid // 提取文件路径
-			//   };
-			//   // console.log(houseData)
-			//   const res = wx.cloud.callContainer({
-			//     "config": {
-			//       "env": "prod-7g3ji5ui73a4702f"
-			//     },
-			//     "path": "/api/house/submit",
-			//     "header": {
-			//       "X-WX-SERVICE": "springboot-2wum",
-			//       "content-type": "application/json"
-			//     },
-			//     "method": "POST",
-			//     "data": houseData,
+			  const res = wx.cloud.callContainer({
+			    "config": {
+			      "env": "prod-7g3ji5ui73a4702f"
+			    },
+			    "path": "/api/house/submit",
+			    "header": {
+			      "X-WX-SERVICE": "springboot-2wum",
+			      "content-type": "application/json"
+			    },
+			    "method": "POST",
+			    "data": housedata,
 				
-			//   })
-			//   console.log(res)
-			//   res.then(response => {
-			//   // 在这里可以访问 response 对象
-			//   console.log("API 响应:", response);
+			  })
+			  console.log(res)
+			  res.then(response => {
+			  // 在这里可以访问 response 对象
+			  console.log("API 响应:", response);
 			  
-			//   // 检查 HTTP 状态码
-			//   if (response.statusCode === 200) {
-			// 	// 检查业务状态码
-			// 	if (response.data.code === "200") {
-			// 	  console.log("操作成功:", response.data.msg);
-			// 	 this.msg = response.data.msg;
-			// 	 this.$refs.success.open('center');
-			// 	} else {
-			// 	  console.error("业务错误:", response.data.msg);
-			// 	 this.msg = response.data.msg;
-			// 	 this.$refs.error.open('center');
-			// 	}
-			//   } else {
-			// 	console.error("HTTP 错误:", response.statusCode);
-			// 	// 错误处理逻辑...
-			//   }
-			// }).catch(error => {
-			//   console.error("请求失败:", error);
-			//   // 错误处理逻辑...
-			// });
-   //    },
-      // // 处理支付选项格式
-      // processRoomFurniture() {
-      //   const processed = {};
-      //   for (const [key, value] of Object.entries(this.RoomFurniture)) {
-      //     processed[key] = Number(value) || 0;
-      //   }
-      //   return processed;
-      }
+			  // 检查 HTTP 状态码
+			  if (response.statusCode === 200) {
+				// 检查业务状态码
+				if (response.data.code === "200") {
+				  console.log("操作成功:", response.data.msg);
+				 this.msg = response.data.msg;
+				 this.$refs.success.open('center');
+				} else {
+				  console.error("业务错误:", response.data.msg);
+				 this.msg = response.data.msg;
+				 this.$refs.error.open('center');
+				}
+			  } else {
+				console.error("HTTP 错误:", response.statusCode);
+				// 错误处理逻辑...
+			  }
+			}).catch(error => {
+			  console.error("请求失败:", error);
+			  // 错误处理逻辑...
+			});
+      
+      },
+	  
+	  /*
+	  
+	  */
+	 // 单独封装的视频上传方法（异步）
+	 // 单独封装的视频上传方法（异步）
+	 async handleVideoUpload() {
+	   const housedata = this.$store.state.baseInfo;
+	   uni.showLoading({ title: '视频上传中...', mask: true });
+	 
+	   try {
+	     const uploadPromises = [];
+	     
+	     for (let j = 0; j < housedata.room.length; j++) {
+	       const room = housedata.room[j];
+	       
+	       // 检查房间是否有视频
+	       if (!room.roomRoomVideo || room.roomRoomVideo.length === 0) {
+	         console.warn(`房间 ${j} 没有视频`);
+	         continue;
+	       }
+	 
+	       for (let i = 0; i < room.roomRoomVideo.length; i++) {
+	         const videoFile = room.roomRoomVideo[i];
+	         
+	         // 生成更安全的文件名
+	         const timestamp = Date.now();
+	         const randomStr = Math.random().toString(36).substr(2, 6);
+	         const cloudPath = `map/${housedata.title}_${j}_${i}_${timestamp}_${randomStr}.mp4`;
+	         
+	         // 将上传任务包装成Promise
+	         uploadPromises.push(
+	           new Promise((resolve, reject) => {
+	             wx.cloud.uploadFile({
+	               cloudPath: cloudPath,
+	               filePath: videoFile,
+	               config: { env: 'prod-7g3ji5ui73a4702f' },
+	               success: (res) => {
+	                 console.log(`视频 ${j}-${i} 上传成功`, res);
+	                 room.roomRoomVideo[i] = res.fileID; // 更新为云文件ID
+	                 resolve(res);
+	               },
+	               fail: (err) => {
+	                 console.error(`视频 ${j}-${i} 上传失败`, err);
+	                 reject(new Error(`视频 ${j}-${i} 上传失败`));
+	               }
+	             });
+	           })
+	         );
+	       }
+	     }
+	 
+	     // 等待所有上传完成
+	     await Promise.all(uploadPromises);
+	     console.log('所有视频上传完成'); 
+		 console.log(this.$store.state.baseInfo);
+	     
+	   } catch (error) {
+	     console.error('视频上传过程中出错:', error);
+	     throw error; // 抛出错误让外层捕获
+	   } finally {
+	     uni.hideLoading();
+	   }
+	 }
+	  
+	  
     }
   }
 </script>
