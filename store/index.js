@@ -4,7 +4,7 @@ const store = createStore({
   state: {
     // 房源基本信息
     baseInfo: {
-      locationName: '',
+      address: '',
       longitude: 0,
       latitude: 0,
       wechat: '',
@@ -12,7 +12,7 @@ const store = createStore({
       title: '',
       location: '',
       area: '',
-      count: 0,
+      roomcount: 0,
 	  room:[]
     },
     // 房间信息数组
@@ -21,6 +21,10 @@ const store = createStore({
     currentRoomIndex: 0
   },
   mutations: {
+	  //更新base房间信息
+	  UPDATE_BASEROOMS(state, {index,data}) {
+		   state.baseInfo.room[index] = {...data}
+	    },
     // 更新基本信息
     UPDATE_BASE_INFO(state, payload) {
       state.baseInfo = { ...state.baseInfo, ...payload }
@@ -93,7 +97,8 @@ const store = createStore({
         title: '',
         location: '',
         area: '',
-        count: 0
+        roomcount: 0,
+		rooms:[]
       }
       state.rooms = []
       state.currentRoomIndex = 0
@@ -105,7 +110,7 @@ const store = createStore({
   actions: {
     // 初始化房间
     initRooms({ commit, state }) {
-      commit('INIT_ROOMS', state.baseInfo.count)
+      commit('INIT_ROOMS', state.baseInfo.roomcount)
     },
     
     // 保存基本信息

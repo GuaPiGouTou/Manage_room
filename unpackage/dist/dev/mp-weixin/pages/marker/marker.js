@@ -1,76 +1,126 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const common_assets = require("../../common/assets.js");
 const _sfc_main = {
   data() {
     return {
-      fileID: "cloud://prod-7g3ji5ui73a4702f.7072-prod-7g3ji5ui73a4702f-1371216117/map/demo1.mp4",
-      value: 0,
-      range: [
-        { value: 0, text: "月付" },
-        { value: 1, text: "季付" },
-        { value: 2, text: "半年付" },
-        { value: 3, text: "年付" }
-      ]
+      baseInfo: {
+        address: "",
+        longitude: 0,
+        latitude: 0,
+        wechat: "",
+        phone: "",
+        title: "",
+        location: "",
+        area: "",
+        roomcount: 0,
+        room: []
+      }
     };
   },
-  // onLoad() {
-  // 	   // 初始化云开发
-  // 	    wx.cloud.init({
-  // 	      env: 'prod-7g3ji5ui73a4702f', // 替换为你的实际环境ID
-  // 	      traceUser: true // 是否记录用户访问
-  // 	    })
-  // },
+  created() {
+    this.loadPropertyData();
+  },
   methods: {
-    selectvideo() {
-      common_vendor.wx$1.chooseMedia({
-        count: 3,
-        maxDuration: 60,
-        success(res2) {
-          common_vendor.index.__f__("log", "at pages/marker/marker.vue:80", res2.tempFiles[0].tempFilePath);
-          common_vendor.index.__f__("log", "at pages/marker/marker.vue:82", res2.tempFiles[0].size);
-          common_vendor.wx$1.cloud.uploadFile({
-            cloudPath: "map/demo1.mp4",
-            filePath: res2.tempFiles[0].tempFilePath,
-            config: {
-              env: "prod-7g3ji5ui73a4702f"
-              // 微信云托管环境ID
-            },
-            success: console.log,
-            fail: console.error
-          });
-        }
-      });
+    loadPropertyData() {
+      this.baseInfo = {
+        address: "北京市朝阳区朝阳公园路8号",
+        longitude: 116.480881,
+        latitude: 39.933363,
+        wechat: "example_wechat",
+        phone: "13800138000",
+        title: "朝阳花园小区",
+        location: "朝阳区CBD核心区",
+        area: "50000",
+        roomcount: 2,
+        room: [
+          {
+            RoomNumber: "A-101",
+            RoomAddress: "1号楼101室",
+            RoomArea: 85,
+            RoomType: "两室一厅",
+            RoomFurniture: [true, false, true, true, false, false, true],
+            RoomVideo: ["video1.mp4", "video2.mp4"],
+            RoomPayment: {
+              monthly: "5000",
+              quarterly: "4800",
+              yearly: "4500"
+            }
+          },
+          {
+            RoomNumber: "B-202",
+            RoomAddress: "2号楼202室",
+            RoomArea: 120,
+            RoomType: "三室一厅",
+            RoomFurniture: [true, true, true, true, true, false, true],
+            RoomVideo: ["video3.mp4"],
+            RoomPayment: {
+              monthly: "8000",
+              quarterly: "7500",
+              yearly: "7000"
+            }
+          }
+        ]
+      };
     },
-    getvideo() {
-      common_vendor.wx$1.cloud.callFunction({
-        // 要调用的云函数名称
-        name: "setvideojson",
-        // 传递给云函数的参数
-        data: {
-          x: 1,
-          y: 2
-        },
-        success: (res2) => {
-          common_vendor.index.__f__("log", "at pages/marker/marker.vue:105", res2);
-        },
-        fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/marker/marker.vue:110", res);
-        },
-        complete: () => {
-        }
+    formatPayment(payment) {
+      if (!payment)
+        return "暂无数据";
+      const methods = [];
+      if (payment.monthly)
+        methods.push(`月付: ¥${payment.monthly}`);
+      if (payment.quarterly)
+        methods.push(`季付: ¥${payment.quarterly}`);
+      if (payment.yearly)
+        methods.push(`年付: ¥${payment.yearly}`);
+      return methods.join(" / ") || "价格面议";
+    },
+    formatFurniture(furniture) {
+      if (!furniture || !furniture.length)
+        return "无";
+      const items = ["床", "沙发", "餐桌", "衣柜", "电视", "冰箱", "洗衣机"];
+      return furniture.map((hasItem, index) => hasItem ? items[index] : null).filter(Boolean).join("、") || "基础配置";
+    },
+    previewVideo(videoUrl) {
+      common_vendor.index.previewVideo({
+        current: 0,
+        urls: [videoUrl]
       });
     }
   }
 };
 function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
-    a: _ctx.indicatorDots,
-    b: _ctx.autoplay,
-    c: _ctx.interval,
-    d: _ctx.duration,
-    e: $data.fileID,
-    f: common_vendor.o((...args) => $options.selectvideo && $options.selectvideo(...args)),
-    g: common_vendor.o((...args) => $options.getvideo && $options.getvideo(...args))
+    a: common_vendor.t($data.baseInfo.title || "未命名小区"),
+    b: common_vendor.t($data.baseInfo.location),
+    c: common_vendor.t($data.baseInfo.address || "暂无数据"),
+    d: common_vendor.t($data.baseInfo.area || "0"),
+    e: common_vendor.t($data.baseInfo.phone || "暂无数据"),
+    f: common_vendor.t($data.baseInfo.wechat || "暂无数据"),
+    g: common_vendor.t($data.baseInfo.room.length),
+    h: common_vendor.f($data.baseInfo.room, (room, index, i0) => {
+      return common_vendor.e({
+        a: common_vendor.t(room.RoomNumber || "未编号"),
+        b: common_vendor.t(room.RoomType || "未分类"),
+        c: common_vendor.t(room.RoomAddress || "同小区地址"),
+        d: common_vendor.t(room.RoomArea || "0"),
+        e: common_vendor.t($options.formatPayment(room.RoomPayment)),
+        f: common_vendor.t($options.formatFurniture(room.RoomFurniture)),
+        g: room.RoomVideo.length
+      }, room.RoomVideo.length ? {
+        h: common_vendor.t(room.RoomVideo.length),
+        i: common_vendor.f(room.RoomVideo, (video, idx, i1) => {
+          return {
+            a: common_vendor.t(idx + 1),
+            b: idx,
+            c: common_vendor.o(($event) => $options.previewVideo(video), idx)
+          };
+        }),
+        j: common_assets._imports_0$1
+      } : {}, {
+        k: index
+      });
+    })
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

@@ -7,9 +7,9 @@
         <text>选择地图坐标</text>
       </button>
       
-      <view v-if="locationName" class="location-info">
+      <view v-if="address" class="location-info">
         <text class="info-label">位置名称：</text>
-        <text class="info-value">{{MarkerData.locationName}}</text>
+        <text class="info-value">{{MarkerData.address}}</text>
         
         <view class="coords-container">
           <view class="coord-item">
@@ -36,7 +36,7 @@
       <input class="input" placeholder="具体地点" v-model="MarkerData.location" />
       <input class="input" placeholder="面积（平方米）" v-model="MarkerData.area" />
       <view ><text style="margin-left: 10rpx; margin-bottom: 10rpx; font-weight: 500;">房间数量</text>
-	  <input class="input" placeholder="" v-model="MarkerData.count" type="number" /></view>
+	  <input class="input" placeholder="" v-model="MarkerData.roomcount" type="number" /></view>
     </view>
 	
 	<!-- 下一步按钮 -->
@@ -50,7 +50,7 @@
     data() {
       return {
 		MarkerData:{
-	                    locationName: '',
+	                    address: '',
 	                    longitude: 0,
 	                    latitude: 0,
 	                    wechat: '',
@@ -58,10 +58,10 @@
 	                    title: '',
 	                    location: '',
 	                    area: '',
-	                    count: 0
+	                    roomcount: 0
 	                }, 
         // 位置信息
-        locationName: 's',
+        address: 's',
         longitude: 0,
         latitude: 0,
 		//视频信息
@@ -75,7 +75,7 @@
         location: '',
         area: '',
         houseType: '',
-        count: 0,
+        roomcount: 0,
         
         // 设施信息
         houseFacilities: [false, false, false, false,false,false,false], // 空调,洗衣机,冰箱,厨房
@@ -94,21 +94,14 @@
     },
 	onLoad() {
 			this.MarkerData  = this.$store.state.baseInfo
+			console.log(this.MarkerData)
 	},
 	computed:{
 	
 		// ...mapState(['baseInfo'])
 		
 	},
-	// watch: {
-	//     // 监听基本信息变化并保存到Vuex
-	//     baseInfo: {
-	//       deep: true,
-	//       handler(newVal) {
-	//         this.$store.dispatch('saveBaseInfo',newVal)
-	//       }
-	//     }
-	//   },
+	
 	//页面卸载时
 	onUnload(){
 		//将MarkerData提交到store中
@@ -117,7 +110,7 @@
 	},
     methods: {
 		nextroom(){
-			if(this.$store.state.baseInfo.count!=0)
+			if(this.MarkerData.roomcount!=0)
 			{
 				this.$store.commit('SET_CURRENT_ROOM_INDEX',0)
 				uni.navigateTo({
@@ -145,7 +138,7 @@
 		},
 		successbvideo_toMap(){
 			 this.$refs.success.close('center');
-			  uni.navigateTo({
+			  uni.reLaunch({
 			               	url:"/pages/map/map"
 			               })
 		},
@@ -181,7 +174,7 @@
             uni.chooseLocation({
               type: 'gcj02',
               success: (res) => {
-                this.MarkerData.locationName = res.name;
+                this.MarkerData.address = res.name;
                 this.MarkerData.longitude = res.longitude;
                 this.MarkerData.latitude = res.latitude;
                 
@@ -244,7 +237,7 @@
 		     basicInfoErrors.push('有效面积');
 		   }
 		   if (!this.houseType) basicInfoErrors.push('房型信息');
-		   if (!this.count || isNaN(this.count) || Number(this.count) <= 0) {
+		   if (!this.roomcount || isNaN(this.roomcount) || Number(this.roomcount) <= 0) {
 		     basicInfoErrors.push('房间数量');
 		   }
 		   

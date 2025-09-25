@@ -28,7 +28,7 @@ const _sfc_main = {
   },
   onLoad() {
     this.roomCount = this.$store.state.currentRoomIndex;
-    this.MaxCount = this.$store.state.baseInfo.count;
+    this.MaxCount = this.$store.state.baseInfo.roomcount;
     common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:147", "onLoad");
     common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:148", this.$store.state.rooms);
     if (this.$store.state.rooms[this.roomCount] != null) {
@@ -39,6 +39,7 @@ const _sfc_main = {
     common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:158", this.roomdata);
     if (this.roomdata.RoomNumber.trim() != null || this.roomdata.RoomAddress.trim() != null || this.roomdata.RoomType.trim() != null) {
       this.$store.commit("UPDATE_ROOM", { index: this.roomCount, data: this.roomdata });
+      this.$store.commit("UPDATE_BASEROOMS", { index: this.roomCount, data: this.roomdata });
     }
   },
   methods: {
@@ -58,7 +59,7 @@ const _sfc_main = {
     //跳转下一个房间
     NextRoom() {
       if (this.roomCount + 1 < this.MaxCount) {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:184", this.roomdata);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:186", this.roomdata);
         if (this.roomdata.RoomNumber.trim() != null && this.roomdata.RoomAddress.trim() != null && this.roomdata.RoomType.trim()) {
           this.$store.commit("SET_CURRENT_ROOM_INDEX", this.roomCount + 1);
           common_vendor.index.redirectTo({
@@ -75,7 +76,7 @@ const _sfc_main = {
     },
     //删除视频路径
     deleteFilePath(index) {
-      this.filepath.splice(index, 1);
+      this.roomdata.RoomVideo.splice(index, 1);
     },
     //点击家具
     onhouse(index) {
@@ -87,7 +88,7 @@ const _sfc_main = {
     },
     successbvideo_toMap() {
       this.$refs.success.close("center");
-      common_vendor.index.navigateTo({
+      common_vendor.index.redirectTo({
         url: "/pages/map/map"
       });
     },
@@ -99,12 +100,13 @@ const _sfc_main = {
           mediaType: ["video"],
           maxDuration: 60,
           success: (res) => {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:232", "chooseMedia_Success");
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:233", res.tempFiles[0].size / 1048576);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:234", res.tempFiles[0].size / 1048576);
             this.roomdata.RoomVideo.push(...res.tempFiles);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:236", "chooseMedia_Success");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:237", this.roomdata.RoomVideo);
           },
           fail: (res) => {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:238", "chooseMedia");
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:240", "chooseMedia");
           }
         });
       }
@@ -160,52 +162,110 @@ const _sfc_main = {
         }
       });
     },
-    //上传标志位状态更改
-    setsubmitflag() {
-      this.submitflag = !this.submitflag;
-    },
     // 提交房源信息
     submitHouseInfo() {
+      if (!this.roomsVerify())
+        return;
+      this.submitVideo().then(() => {
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:314", "-----submit----");
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:315", this.$store.state.baseInfo);
+        this.sumbit();
+      });
+    },
+    //视频上传
+    async submitVideo() {
+      common_vendor.index.showLoading({ title: "视频上传中...", mask: true });
+      let rooms = this.$store.state.baseInfo.room;
+      let house = this.$store.state.baseInfo;
+      let p = rooms.map((item, index) => {
+        return this.VideoUp(house, item).then((res) => {
+          let room = item;
+          room.RoomVideo = [];
+          res.forEach((item2, index2) => {
+            room.RoomVideo[index2] = item2;
+          });
+          this.$store.commit("UPDATE_BASEROOMS", { index, data: room });
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:338", this.$store.state.baseInfo.room[index]);
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:339", "---------");
+        });
+      });
+      await Promise.all(p);
+      common_vendor.index.hideLoading();
+      common_vendor.index.showToast({
+        title: "上传成功",
+        icon: "success"
+      });
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:351", "----base-----");
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:352", this.$store.state.baseInfo);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:353", "-----rooms----");
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:354", this.$store.state.rooms);
+    },
+    // 单独封装的视频上传方法（异步）
+    async VideoUp(title, room) {
+      let fileID = [];
+      room.RoomVideo.forEach((item, index) => {
+        let cloudPath = "map/" + title + "_" + index + ".mp4";
+        let filePath = item.tempFilePath;
+        let p = common_vendor.wx$1.cloud.uploadFile({
+          cloudPath,
+          filePath
+        });
+        fileID.push(p);
+      });
+      fileID = await Promise.all(fileID);
+      fileID = fileID.map((item) => {
+        return item.fileID;
+      });
+      return fileID;
+    },
+    //验证房源信息模块
+    houseInfoVerify() {
       const housedata = this.$store.state.baseInfo;
-      if (!housedata.locationName || !housedata.longitude || !housedata.latitude) {
+      if (!housedata.address || !housedata.longitude || !housedata.latitude) {
         common_vendor.index.showToast({
           title: "房源信息中未选择地图位置",
           icon: "none",
           duration: 3e3
         });
-        return;
+        return false;
       }
       if (!housedata.wechat && !housedata.phone) {
         common_vendor.index.showToast({ title: "房源信息至少填写一种联系方式", icon: "none" });
-        return;
+        return false;
       }
       if (housedata.phone && !/^1[3-9]\d{9}$/.test(housedata.phone)) {
         common_vendor.index.showToast({ title: "手机号格式不正确", icon: "none" });
-        return;
+        return false;
       }
       if (!housedata.title.trim()) {
         common_vendor.index.showToast({ title: "房源信息中未填写标题", icon: "none", duration: 3e3 });
-        return;
+        return false;
       }
       if (!housedata.location.trim()) {
         common_vendor.index.showToast({ title: "房源信息中未填写具体地点", icon: "none" });
-        return;
+        return false;
       }
       if (!housedata.area.trim()) {
         common_vendor.index.showToast({ title: "房源信息中未填写面积", icon: "none" });
-        return;
+        return false;
       }
-      const rooms = this.$store.state.rooms;
+      return true;
+    },
+    //房间信息验证模块
+    roomsVerify() {
       if (this.roomdata.RoomNumber.trim() != "" && this.roomdata.RoomAddress.trim() != "" && this.roomdata.RoomType.trim() != "") {
         this.$store.commit("UPDATE_ROOM", { index: this.roomCount, data: this.roomdata });
+        this.$store.commit("UPDATE_BASEROOMS", { index: this.roomCount, data: this.roomdata });
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:428", "roomsVerify");
       } else {
         common_vendor.index.showToast({
           title: "房间信息不能为空",
           icon: "none",
           duration: 3e3
         });
-        return;
+        return false;
       }
+      const rooms = this.$store.state.rooms;
       for (var i = 0; i < rooms.length; i++) {
         const validPayments = Object.values(rooms[i].RoomPayment).filter((amount) => amount > 0);
         if (validPayments.length === 0) {
@@ -214,25 +274,22 @@ const _sfc_main = {
             icon: "none",
             duration: 3e3
           });
-          return;
+          return false;
         }
-      }
-      housedata.room = rooms;
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:381", rooms);
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:382", housedata);
-      this.handleVideoUpload().then(() => {
-        if (this.$store.state.rooms.some((room) => !room.RoomVideo.length)) {
-          throw new Error("请为每个房间至少上传一个视频");
+        if (rooms[i].RoomVideo.length === 0) {
+          common_vendor.index.showToast({
+            title: "请至少上传一个视频文件",
+            icon: "none",
+            duration: 3e3
+          });
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:461", "请至少上传一个视频文件");
+          return false;
         }
-      });
-      if (rooms.RoomVideo.length === 0) {
-        common_vendor.index.showToast({
-          title: "请至少上传一个视频文件",
-          icon: "none",
-          duration: 3e3
-        });
-        return;
+        return true;
       }
+    },
+    //上传表单信息
+    sumbit() {
       const res = common_vendor.wx$1.cloud.callContainer({
         "config": {
           "env": "prod-7g3ji5ui73a4702f"
@@ -243,79 +300,30 @@ const _sfc_main = {
           "content-type": "application/json"
         },
         "method": "POST",
-        "data": housedata
+        "data": this.$store.state.baseInfo
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:449", res);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:484", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:452", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:487", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:458", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:493", "操作成功:", response.data.msg);
+            this.$store.commit("CLEAR_ALL_DATA");
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:462", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:498", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:467", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:503", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:471", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:507", "请求失败:", error);
       });
-    },
-    /*
-    
-    */
-    // 单独封装的视频上传方法（异步）
-    // 单独封装的视频上传方法（异步）
-    async handleVideoUpload() {
-      const housedata = this.$store.state.baseInfo;
-      common_vendor.index.showLoading({ title: "视频上传中...", mask: true });
-      try {
-        const uploadPromises = [];
-        for (let j = 0; j < housedata.room.length; j++) {
-          const room = housedata.room[j];
-          if (!room.roomRoomVideo || room.roomRoomVideo.length === 0) {
-            common_vendor.index.__f__("warn", "at pages/marker/addMarker/NextRoom.vue:494", `房间 ${j} 没有视频`);
-            continue;
-          }
-          for (let i = 0; i < room.roomRoomVideo.length; i++) {
-            const videoFile = room.roomRoomVideo[i];
-            const timestamp = Date.now();
-            const randomStr = Math.random().toString(36).substr(2, 6);
-            const cloudPath = `map/${housedata.title}_${j}_${i}_${timestamp}_${randomStr}.mp4`;
-            uploadPromises.push(
-              new Promise((resolve, reject) => {
-                common_vendor.wx$1.cloud.uploadFile({
-                  cloudPath,
-                  filePath: videoFile,
-                  config: { env: "prod-7g3ji5ui73a4702f" },
-                  success: (res) => {
-                    common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:514", `视频 ${j}-${i} 上传成功`, res);
-                    room.roomRoomVideo[i] = res.fileID;
-                    resolve(res);
-                  },
-                  fail: (err) => {
-                    common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:519", `视频 ${j}-${i} 上传失败`, err);
-                    reject(new Error(`视频 ${j}-${i} 上传失败`));
-                  }
-                });
-              })
-            );
-          }
-        }
-        await Promise.all(uploadPromises);
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:530", "所有视频上传完成");
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:531", this.$store.state.baseInfo);
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:534", "视频上传过程中出错:", error);
-        throw error;
-      } finally {
-        common_vendor.index.hideLoading();
-      }
     }
+    //
   }
 };
 if (!Array) {
@@ -370,7 +378,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         d: index
       };
     }),
-    o: common_assets._imports_0$1,
+    o: common_assets._imports_0$2,
     p: common_vendor.t($data.msg),
     q: common_vendor.o((...args) => $options.successbvideo_close && $options.successbvideo_close(...args)),
     r: common_vendor.sr("error", "6d1511a3-0"),

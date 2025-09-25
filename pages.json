@@ -10,7 +10,8 @@
 			"path" : "pages/map/map",
 			"style" : 
 			{
-				"navigationBarTitleText" : ""
+				"navigationBarTitleText" : "",
+				"enablePullDownRefresh": true
 			}
 		}
 		

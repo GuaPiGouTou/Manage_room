@@ -8,6 +8,8 @@
 		></map>
 		<button @tap="Tapto">ddd</button>
 		<button @tap="addmarker">添加标记点</button>
+		<button @tap="startrefresh">点击刷新</button>
+		
 
 	</view>
 </template>
@@ -64,21 +66,6 @@
 
 					width: 30,
 					height: 30
-				},{
-					id:2,
-					latitude: 39.303594,
-					longitude:112.45807,
-					iconPath: '../../static/map/buleMarker.png',
-					callout: {
-						content: '丁香园小区1间',
-						textAlign: 'center',
-						color: '#00aa00',
-						borderRadius: 10,
-						borderWidth: 2,
-						display: "ALWAYS",
-					},
-					width: 30,
-					height: 30
 				}],
 				
 				controls: [{
@@ -105,8 +92,15 @@
 		refreshMarkers() {
 		  this.getAllMark();
 		},
+		onPullDownRefresh() {
+			this.getAllMark()
+			setTimeout(()=>{uni.stopPullDownRefresh()},3000)
+		},
 		methods: {
-			
+			//点击刷新
+			startrefresh(){
+				uni.startPullDownRefresh()
+			},
 			// 将 API 数据转换为地图标记格式
 			convertApiDataToMarkers(apiData) {
 			  return apiData.map(item => {
@@ -116,7 +110,7 @@
 			      longitude: item.longitude, // 使用 API 返回的 longitude
 			      iconPath: '../../static/map/buleMarker.png', // 根据 ID 获取图标
 			      callout: {
-			        content: item.title, // 使用 API 返回的 title
+			        content: item.title+"("+item.count+")", // 使用 API 返回的 title
 			        textAlign: 'center',
 			        color: '#00aa00',
 			        borderRadius: 10,
