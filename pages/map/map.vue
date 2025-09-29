@@ -224,7 +224,7 @@
 			TapMarker(e){
 				console.log(e.markerId)
 				wx.redirectTo({
-					url:"/pages/marker/marker",
+					url:"/pages/marker/marker?id="+e.markerId,
 					fail(e) {
 						console.log(e)
 					}

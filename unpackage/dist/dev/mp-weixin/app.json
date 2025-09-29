@@ -4,7 +4,8 @@
     "pages/map/map",
     "pages/marker/marker",
     "pages/marker/addMarker/addMarker",
-    "pages/marker/addMarker/NextRoom"
+    "pages/marker/addMarker/NextRoom",
+    "pages/marker/markerAddRoom"
   ],
   "window": {
     "navigationBarTextStyle": "black",

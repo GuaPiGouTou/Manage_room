@@ -11,9 +11,9 @@ const _sfc_main = {
         RoomArea: "",
         RoomType: "",
         RoomPayment: {
-          "月付": 0,
-          "半年付": 0,
-          "年付": 0
+          "monthly": 0,
+          "quarterly": 0,
+          "yearly": 0
         },
         RoomFurniture: [false, false, false, false, false, false, false],
         RoomVideo: []
@@ -290,6 +290,7 @@ const _sfc_main = {
     },
     //上传表单信息
     sumbit() {
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:471", this.$store.state.baseInfo);
       const res = common_vendor.wx$1.cloud.callContainer({
         "config": {
           "env": "prod-7g3ji5ui73a4702f"
@@ -302,25 +303,25 @@ const _sfc_main = {
         "method": "POST",
         "data": this.$store.state.baseInfo
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:484", res);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:485", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:487", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:488", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:493", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:494", "操作成功:", response.data.msg);
             this.$store.commit("CLEAR_ALL_DATA");
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:498", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:499", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:503", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:504", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:507", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:508", "请求失败:", error);
       });
     }
     //
@@ -351,7 +352,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         a: `${key}价格`,
         b: $data.roomdata.RoomPayment[key],
         c: common_vendor.o(($event) => $data.roomdata.RoomPayment[key] = $event.detail.value, index),
-        d: common_vendor.t(key),
+        d: common_vendor.t(key == "monthly" ? "月付" : key == "quarterly" ? "半年付" : "年付"),
         e: index
       };
     }),
@@ -378,7 +379,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         d: index
       };
     }),
-    o: common_assets._imports_0$2,
+    o: common_assets._imports_0$1,
     p: common_vendor.t($data.msg),
     q: common_vendor.o((...args) => $options.successbvideo_close && $options.successbvideo_close(...args)),
     r: common_vendor.sr("error", "6d1511a3-0"),

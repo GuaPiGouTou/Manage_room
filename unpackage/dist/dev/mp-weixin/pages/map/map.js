@@ -203,7 +203,7 @@ const _sfc_main = {
     TapMarker(e) {
       common_vendor.index.__f__("log", "at pages/map/map.vue:225", e.markerId);
       common_vendor.wx$1.redirectTo({
-        url: "/pages/marker/marker",
+        url: "/pages/marker/marker?id=" + e.markerId,
         fail(e2) {
           common_vendor.index.__f__("log", "at pages/map/map.vue:229", e2);
         }

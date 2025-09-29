@@ -5,7 +5,6 @@
     <!-- 房源基本信息 -->
     <view class="section">
       <view class="section-title">房间信息</view>
-	   <view class="section-title">房间数：{{roomCount+1}}/{{MaxCount}}</view>
       <input class="input" placeholder="房间号" v-model="roomdata.RoomNumber" />
       <input class="input" placeholder="具体地址" v-model="roomdata.RoomAddress" />
       <input class="input" placeholder="面积（平方米）" v-model="roomdata.RoomArea" />
@@ -54,7 +53,7 @@
 	
 	 <view style="display: flex; flex-wrap: wrap; padding: 10px;">
 	   <view 
-	     v-for="(item,index) in this.roomdata.RoomVideo" 
+	     v-for="(item,index) in this.filepath" 
 	     :key="index" 
 	     style="width: 40%; margin: 0 5% 10px 5%;"
 	   >
@@ -110,9 +109,7 @@
     </view>
 
 	<!-- 下一个房间页面按钮 -->
-    <button  v-if="roomCount+1-MaxCount==0" class="submit-btn" @tap="submitHouseInfo">提交信息</button>
-    <button  v-else class="submit-btn" @tap="NextRoom">下一步</button>
-    <button class="submit-btn" @tap="ReturnRoom">上一步</button>
+    <button  class="submit-btn" @tap="submitHouseInfo">提交信息</button>
   </view>
 </template>
 
@@ -138,72 +135,19 @@
 		MaxCount:null,
         houseName:["浴缸","花洒","冰箱","空调","微波炉","洗衣机","油烟机"],
 		filepath:[],
-		msg:null
+		msg:null,
+		PropertyId:0
       }
     },
-	onLoad() {
-		this.roomCount =  this.$store.state.currentRoomIndex
-		this.MaxCount  =  this.$store.state.baseInfo.roomcount
-		console.log("onLoad")
-		console.log(this.$store.state.rooms)
-		if(this.$store.state.rooms[this.roomCount] !=null)
-		{
-			this.roomdata  =  this.$store.state.rooms[this.roomCount]  
-			
-		}
-		
+	onLoad(res) {
+		this.PropertyId = res.id
 	},
-	onUnload() {
-
-		 console.log(this.roomdata)
-		 if(this.roomdata.RoomNumber.trim()!=null||this.roomdata.RoomAddress.trim()!=null||this.roomdata.RoomType.trim()!=null)
-		 {
-			 	this.$store.commit('UPDATE_ROOM',{index:this.roomCount,data:this.roomdata})
-			 	this.$store.commit('UPDATE_BASEROOMS',{index:this.roomCount,data:this.roomdata})
-			
-		 }
 	
-	},
     methods: {
-		//跳转上一个房间
-		ReturnRoom(){
-		if(this.roomCount+1>1)
-		{
-			this.$store.commit('SET_CURRENT_ROOM_INDEX',this.roomCount-1)
-			uni.redirectTo({
-				url:"/pages/marker/addMarker/NextRoom"
-			})
-		}else{
-			uni.redirectTo({
-				url:"/pages/marker/addMarker/addMarker"
-			})
-		}
-		
-		},
-		//跳转下一个房间
-		NextRoom(){
-			if(this.roomCount+1<this.MaxCount)
-			{	console.log(this.roomdata)
-				if(this.roomdata.RoomNumber.trim()!=null&&this.roomdata.RoomAddress.trim()!=null&&this.roomdata.RoomType.trim())
-				{
-					this.$store.commit('SET_CURRENT_ROOM_INDEX',this.roomCount+1)
-					uni.redirectTo({
-						url:"/pages/marker/addMarker/NextRoom"
-					})
-				}else{
-					this.msg = "当前房间未完成填写"
-					this.$refs.error.open("center")
-				}
-				
-			}else{
-				this.msg = "当前房间已经为最后一个房间！"
-				this.$refs.error.open("center")
-			}
-			
-		},
+
 		//删除视频路径
 		deleteFilePath(index){
-			this.roomdata.RoomVideo.splice(index, 1)
+			this.filepath.splice(index, 1)
 		},
 		//点击家具
 		onhouse(index){
@@ -232,12 +176,10 @@
 					success:(res)=> {
 						
 						console.log(res.tempFiles[0].size/1048576)
-						this.roomdata.RoomVideo.push(...res.tempFiles)
-						console.log("chooseMedia_Success")
-						console.log(this.roomdata.RoomVideo)
+						this.filepath.push(...res.tempFiles)		
+						
 					},
 					fail:(res)=>{
-						console.log("chooseMedia")
 						flag=false	
 					}
 				})
@@ -247,44 +189,7 @@
 			}
 			
 		},
-      // 选择地图位置
-      chooseLocation() {
-        uni.authorize({
-          scope: 'scope.userLocation',
-          success: () => {
-            uni.chooseLocation({
-              type: 'gcj02',
-              success: (res) => {
-                this.RoomAddress = res.name;
-                this.longitude = res.longitude;
-                this.latitude = res.latitude;
-                
-                // 自动填充具体地点
-                  this.location = res.address;
-                
-              },
-              fail: (err) => {
-                uni.showToast({
-                  title: '位置选择失败',
-                  icon: 'none'
-                });
-              }
-            });
-          },
-          fail: () => {
-            uni.showModal({
-              title: '权限提示',
-              content: '需要位置权限才能选择地点，请开启权限',
-              confirmText: '去设置',
-              success: (res) => {
-                if (res.confirm) {
-                  uni.openSetting();
-                }
-              }
-            });
-          }
-        });
-      },
+ 
       
       // 添加支付方式
       addPaymentOption() {
@@ -307,13 +212,12 @@
       // 提交房源信息
        submitHouseInfo() {
 		   //验证信息
-		  // if(!this.houseInfoVerify()) return;
 		  if(!this.roomsVerify()) return;
 		  this.submitVideo().then(()=>{
 			  // 上传表单
 			  	console.log("-----submit----")
-			  console.log(this.$store.state.baseInfo)
-			  this.sumbit()
+			  console.log(this.roomdata)
+			  // this.sumbit()
 		  })
 			
 	
@@ -323,122 +227,50 @@
 	  //视频上传
 	async  submitVideo(){
 		   uni.showLoading({ title: '视频上传中...', mask: true });
-		   let rooms = this.$store.state.baseInfo.room;
-		   let house = this.$store.state.baseInfo;
+			let files= []
+			  //视频上传
+			  					  const that = this;
+			  						for(let i = 0;i<that.filepath.length;i++)
+			  						{
+			  							let p = wx.cloud.uploadFile({
+			  							cloudPath:"map/"+this.title+i+".mp4",
+			  							filePath:that.filepath[i].tempFilePath,
+			  							 config: {
+			  								env: 'prod-7g3ji5ui73a4702f' // 微信云托管环境ID
+			  							  },
+			  							  success(res){
+			  									console.log("uploadFile_success")
+			  									this.roomdata.RoomVideo[i] = res.fileID
+												
+			  							
+			  							  },
+			  								fail(res){
+			  									console.log("uploadFile_fail")
+			  									
+			  									}
+			  						})	
+									files.push(p)
+			  						}
+
 			
-			let p =	rooms.map((item,index)=>{
-				return	this.VideoUp(house,item).then((res)=>{
-					let room = item
-					room.RoomVideo = []
-					res.forEach((item,index)=>{room.RoomVideo[index] = item})
-					
-					this.$store.commit('UPDATE_BASEROOMS',{index:index,data:room}) 
-					
-					
-					console.log(this.$store.state.baseInfo.room[index])
-					console.log("---------")
-					
-				})
-				
-			});
-			
-			await Promise.all(p)
+			await Promise.all(files)
 			uni.hideLoading();
 			uni.showToast({
 				title:"上传成功",
 				icon:'success'
-			})
-				console.log("----base-----")
-			console.log(this.$store.state.baseInfo)			
-			   	console.log("-----rooms----")
-			console.log(this.$store.state.rooms)			   
-		
-			
-		
-		   
-		   
+			})  
 		
 	  },
 	  
-	 // 单独封装的视频上传方法（异步）
-	 async VideoUp(title,room){
-		 let fileID = []
-		room.RoomVideo.forEach((item,index)=>{
-			let cloudPath = "map/"+title+"_"+index+".mp4";
-			let filePath =item.tempFilePath;
-			let p =wx.cloud.uploadFile({
-				cloudPath:cloudPath,
-				filePath:filePath
-			});
-			fileID.push(p)
-		})
-		fileID = await Promise.all(fileID)
-		fileID = fileID.map((item) => {
-			  return item.fileID;
-			})
-			return fileID;
-	 },
+	
 	 
-	 //验证房源信息模块
-	 houseInfoVerify(){
-		 const housedata  = this.$store.state.baseInfo
-		 
-		  // 1. 位置信息验证
-		   if (!housedata.address || !housedata.longitude || !housedata.latitude) {
-		     uni.showToast({ 
-		 				title: '房源信息中未选择地图位置',
-		 				icon:'none',
-		 				duration:3000});
-		     return false;
-		   }
-		 // 2. 联系方式验证
-		 
-		 if (!housedata.wechat && !housedata.phone) {
-		     uni.showToast({ title: '房源信息至少填写一种联系方式', icon: 'none' });
-		 	 return false;
-		 }
-		 if (housedata.phone && !/^1[3-9]\d{9}$/.test(housedata.phone)) {
-		      uni.showToast({ title: '手机号格式不正确', icon: 'none' });
-		 	 return false;
-		 }
-		   // 3. 房源基本信息验证
-		   if (!housedata.title.trim())
-		   {
-			   uni.showToast({ title: '房源信息中未填写标题', icon: 'none',duration:3000 });
-			    return false;
-		   }
-		   if (!housedata.location.trim()){
-			   uni.showToast({ title: '房源信息中未填写具体地点', icon: 'none' });
-			    return false;
-		   }
-		   if (!housedata.area.trim()) {
-		       uni.showToast({ title: '房源信息中未填写面积', icon: 'none' });
-		 	return false;
-		   }
-		   return true;
-	 },
+	
 	 //房间信息验证模块
 	 roomsVerify(){
-		 //4.最后一间房信息验证
-		   if(this.roomdata.RoomNumber.trim()!=''&&this.roomdata.RoomAddress.trim()!=''&&this.roomdata.RoomType.trim()!='')
-		   {
-		   			 	
-						this.$store.commit('UPDATE_ROOM',{index:this.roomCount,data:this.roomdata})
-						this.$store.commit('UPDATE_BASEROOMS',{index:this.roomCount,data:this.roomdata})
-						console.log("roomsVerify")
-		   }else{
-			   uni.showToast({
-				title:"房间信息不能为空",
-				icon:'none',
-				duration:3000
-			   });
-			   return false;
-		   }
-		     
 			// //5.所有房间支付选项验证
-			const rooms = this.$store.state.rooms
-		   for (var i = 0; i < rooms.length; i++) {
-		   	const validPayments = Object.values(rooms[i].RoomPayment)
+	
+		   
+		   	const validPayments = Object.values(this.roomdata.RoomPayment)
 		   	  .filter(amount => amount > 0);
 		   	
 		   	if (validPayments.length === 0) {
@@ -452,7 +284,7 @@
 			
 			// 6. 媒体文件验证i
 			
-			if (rooms[i].RoomVideo.length === 0) {
+			if (this.filepath.length === 0) {
 			  uni.showToast({
 				title: '请至少上传一个视频文件',
 				icon: 'none',
@@ -462,55 +294,55 @@
 			  return false;
 			}
 			return true;
-		   }
+		   
 		   
 		 
 	 },
 	 //上传表单信息
 	 sumbit(){
-		 console.log(this.$store.state.baseInfo)
-		 const res = wx.cloud.callContainer({
-		     "config": {
-		       "env": "prod-7g3ji5ui73a4702f"
-		     },
-		     "path": "/api/house/submit",
-		     "header": {
-		       "X-WX-SERVICE": "springboot-2wum",
-		       "content-type": "application/json"
-		     },
-		     "method": "POST",
-		     "data": this.$store.state.baseInfo,
+		console.log(this.roomdata)
+		 // const res = wx.cloud.callContainer({
+		 //     "config": {
+		 //       "env": "prod-7g3ji5ui73a4702f"
+		 //     },
+		 //     "path": "/api/house/submit",
+		 //     "header": {
+		 //       "X-WX-SERVICE": "springboot-2wum",
+		 //       "content-type": "application/json"
+		 //     },
+		 //     "method": "POST",
+		 //     "data": this.roomdata
 		 	
-		   })
-		   console.log(res)
-		   res.then(response => {
-		   // 在这里可以访问 response 对象
-		   console.log("API 响应:", response);
+		 //   })
+		 //   console.log(res)
+		 //   res.then(response => {
+		 //   // 在这里可以访问 response 对象
+		 //   console.log("API 响应:", response);
 		   
-		   // 检查 HTTP 状态码
-		   if (response.statusCode === 200) {
-		 	// 检查业务状态码
-		 	if (response.data.code === "200") {
-		 	  console.log("操作成功:", response.data.msg);
-			  this.$store.commit('CLEAR_ALL_DATA');
-		 	 this.msg = response.data.msg;
-		 	 this.$refs.success.open('center');
-		 	} else {
-		 	  console.error("业务错误:", response.data.msg);
-		 	 this.msg = response.data.msg;
-		 	 this.$refs.error.open('center');
-		 	}
-		   } else {
-		 	console.error("HTTP 错误:", response.statusCode);
-		 	// 错误处理逻辑...
-		   }
-		 }).catch(error => {
-		   console.error("请求失败:", error);
-		   // 错误处理逻辑...
-		 });
+		 //   // 检查 HTTP 状态码
+		 //   if (response.statusCode === 200) {
+		 // 	// 检查业务状态码
+		 // 	if (response.data.code === "200") {
+		 // 	  console.log("操作成功:", response.data.msg);
+			//   this.$store.commit('CLEAR_ALL_DATA');
+		 // 	 this.msg = response.data.msg;
+		 // 	 this.$refs.success.open('center');
+		 // 	} else {
+		 // 	  console.error("业务错误:", response.data.msg);
+		 // 	 this.msg = response.data.msg;
+		 // 	 this.$refs.error.open('center');
+		 // 	}
+		 //   } else {
+		 // 	console.error("HTTP 错误:", response.statusCode);
+		 // 	// 错误处理逻辑...
+		 //   }
+		 // }).catch(error => {
+		 //   console.error("请求失败:", error);
+		 //   // 错误处理逻辑...
+		 // });
 		 
 	 }
-	 //
+	 
 	  
 	  
     }

@@ -8,6 +8,7 @@ if (!Math) {
   "./pages/marker/marker.js";
   "./pages/marker/addMarker/addMarker.js";
   "./pages/marker/addMarker/NextRoom.js";
+  "./pages/marker/markerAddRoom.js";
 }
 const _sfc_main = {
   onLaunch: function() {

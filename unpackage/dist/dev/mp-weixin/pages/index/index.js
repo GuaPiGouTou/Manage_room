@@ -31,7 +31,7 @@ const _sfc_main = {
   methods: {
     ToMap1() {
       common_vendor.index.redirectTo({
-        url: "/pages/marker/addMarker/addMarker"
+        url: "/pages/marker/marker"
       });
     },
     openr() {
@@ -89,11 +89,12 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return {
     a: common_assets._imports_0,
     b: common_vendor.o((...args) => $options.openLoing && $options.openLoing(...args)),
-    c: common_assets._imports_1,
-    d: common_vendor.t($data.msg),
-    e: common_vendor.o((...args) => $options.ToMap && $options.ToMap(...args)),
-    f: common_vendor.sr("popup", "1cf27b2a-0"),
-    g: common_vendor.p({
+    c: common_vendor.o(($event) => $options.ToMap1()),
+    d: common_assets._imports_1,
+    e: common_vendor.t($data.msg),
+    f: common_vendor.o((...args) => $options.ToMap && $options.ToMap(...args)),
+    g: common_vendor.sr("popup", "1cf27b2a-0"),
+    h: common_vendor.p({
       type: "bottom",
       ["border-radius"]: "10px 10px 0 0"
     })

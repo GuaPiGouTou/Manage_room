@@ -10,7 +10,7 @@
     <!-- 微信授权登录 -->
 	<view style="background-color: beige; border-radius: 300px;">
 		<button type="primary"  style="border-radius: 30rpx;" @tap="openLoing">微信授权登录</button>
-		<!-- <button type="primary"  style="border-radius: 30rpx;" @tap="ToMap1()">add</button> -->
+		<button type="primary"  style="border-radius: 30rpx;" @tap="ToMap1()">add</button>
 	</view>
 	<uni-popup ref="popup" type="bottom" border-radius="10px 10px 0 0">
 		
@@ -50,7 +50,7 @@
     methods: {
 		ToMap1(){
 			uni.redirectTo({
-				url:"/pages/marker/addMarker/addMarker"
+				url:"/pages/marker/marker"
 			})
 		},
 		openr(){

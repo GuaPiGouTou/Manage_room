@@ -1,111 +1,104 @@
 <template>
   <view class="property-container">
+	
     <!-- 顶部标题 -->
-    <view class="header">
-      <text class="title">{{ baseInfo.title || '未命名小区' }}</text>
-      <text class="location">{{ baseInfo.location }}</text>
-    </view>
-    
-    <!-- 小区基本信息卡片 -->
-    <view class="info-card base-info">
-      <view class="card-header">
-        <text class="card-title">小区基本信息</text>
+      <view class="header">
+        <text class="title">{{ baseInfo.title || '未命名小区' }}</text>
+        <text class="location">{{ baseInfo.location }}</text>
       </view>
       
-      <view class="info-grid">
-        <view class="info-item">
-          <text class="info-label">地址:</text>
-          <text class="info-value">{{ baseInfo.address || '暂无数据' }}</text>
+      <!-- 小区基本信息卡片 -->
+      <view class="info-card base-info">
+        <view class="card-header">
+          <text class="card-title">小区基本信息</text>
         </view>
         
-        <view class="info-item">
-          <text class="info-label">面积:</text>
-          <text class="info-value">{{ baseInfo.area || '0' }}㎡</text>
-        </view>
-        
-        <view class="info-item">
-          <text class="info-label">联系电话:</text>
-          <text class="info-value">{{ baseInfo.phone || '暂无数据' }}</text>
-        </view>
-        
-        <view class="info-item">
-          <text class="info-label">微信:</text>
-          <text class="info-value">{{ baseInfo.wechat || '暂无数据' }}</text>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 房间列表 -->
-    <view class="info-card room-list">
-      <view class="card-header">
-        <text class="card-title">房源信息 ({{ baseInfo.room.length }}间)</text>
-      </view>
-      
-      <!-- 房间卡片 -->
-      <view 
-        v-for="(room, index) in baseInfo.room" 
-        :key="index" 
-        class="room-card"
-      >
-        <view class="room-header">
-          <text class="room-number">{{ room.RoomNumber || '未编号' }}</text>
-          <text class="room-type">{{ room.RoomType || '未分类' }}</text>
-        </view>
-        
-        <view class="room-details">
-          <view class="detail-item">
-            <text class="detail-label">地址:</text>
-            <text class="detail-value">{{ room.RoomAddress || '同小区地址' }}</text>
+        <view class="info-grid">
+          <view class="info-item">
+            <text class="info-label">地址:</text>
+            <text class="info-value">{{ baseInfo.address || '暂无数据' }}</text>
           </view>
           
-          <view class="detail-item">
-            <text class="detail-label">面积:</text>
-            <text class="detail-value">{{ room.RoomArea || '0' }}㎡</text>
+          <view class="info-item">
+            <text class="info-label">面积:</text>
+            <text class="info-value">{{ baseInfo.area || '0' }}㎡</text>
           </view>
           
-          <view class="detail-item">
-            <text class="detail-label">支付方式:</text>
-            <text class="detail-value">
-              {{ formatPayment(room.RoomPayment) }}
-            </text>
+          <view class="info-item">
+            <text class="info-label">联系电话:</text>
+            <text class="info-value">{{ baseInfo.phone || '暂无数据' }}</text>
           </view>
           
-          <view class="detail-item">
-            <text class="detail-label">家具配置:</text>
-            <text class="detail-value">
-              {{ formatFurniture(room.RoomFurniture) }}
-            </text>
+          <view class="info-item">
+            <text class="info-label">微信:</text>
+            <text class="info-value">{{ baseInfo.wechat || '暂无数据' }}</text>
           </view>
-        </view>
-        
-        <!-- 视频预览 -->
-        <view v-if="room.RoomVideo.length" class="video-section">
-          <text class="section-title">房间视频 ({{ room.RoomVideo.length }}个)</text>
-          <view class="video-thumbnails">
-            <view 
-              v-for="(video, idx) in room.RoomVideo" 
-              :key="idx" 
-              class="video-thumb"
-              @click="previewVideo(video)"
-            >
-              <image 
-                src="/static/video-icon.png" 
-                mode="aspectFill"
-                class="video-icon"
-              />
-              <text class="video-index">视频 {{ idx + 1 }}</text>
-            </view>
-          </view>
+		  <view>
+			  	<button type="primary" @click="insert_room(this.propertyId)">添加房间</button>
+		  </view>
         </view>
       </view>
-    </view>
+	  
+	   <!-- 房间列表 -->
+	      <view  class="info-card room-list">
+	        <view class="card-header">
+	          <text class="card-title" @tap="room">房源信息 ({{ baseInfo.roomcount }}间)</text>
+	        </view>
+	     
+	        <!-- 房间卡片 -->
+	       <view 
+	          v-for="(room, index) in baseInfo.room" 
+	          :key="index" 
+	          class="room-card"
+	        >
+	          <view class="room-header">
+	            <text class="room-number">{{ room.roomNumber || '未编号' }}</text>
+	            <text class="room-type">{{ room.roomType || '未分类' }}</text>
+	          </view>
+	          
+	          <view class="room-details">
+	            <view class="detail-item">
+	              <text class="detail-label">地址:</text>
+	              <text class="detail-value">{{ room.roomAddress || '同小区地址' }}</text>
+	            </view>
+	            
+	            <view class="detail-item">
+	              <text class="detail-label">面积:</text>
+	              <text class="detail-value">{{ room.roomArea || '0' }}㎡</text>
+	            </view>
+	            
+	            <view class="detail-item">
+	              <text class="detail-label">支付方式:</text>
+	              <text class="detail-value">
+	                {{ formatPayment(room.roomPayment) }}
+	              </text>
+	            </view>
+	            
+	            <view class="detail-item">
+	              <text class="detail-label">家具配置:</text>
+	              <text class="detail-value">
+	                {{ formatFurniture(room.roomFurniture) }}
+	              </text>
+	            </view>
+				<view >
+					<button type="warn"  @click="delete_room(room.roomId,index)">删除房间</button>
+				
+				</view>
+	          </view>
+	          
+	          <!-- 视频预览 -->
+	        
+	        </view>
+	      </view>
+	
   </view>
 </template>
 
 <script>
 export default {
-  data() {
+  data() { 
     return {
+		propertyId:1,
       baseInfo: {
         address: '',
         longitude: 0,
@@ -116,82 +109,127 @@ export default {
         location: '',
         area: '',
         roomcount: 0,
-        room: []
+        room: [{
+        roomId: 101,
+        roomNumber: "101",
+        roomAddress: "主卧",
+        roomArea: 45.5,
+        roomType: "主卧室",
+        roomPayment: {
+          monthly: 8000,
+          quarterly: 22000,
+          yearly: 80000
+        },
+        roomFurniture: [true, true, true, false],
+        roomVideo: ["video1", "video2"],
+        propertyId: 1
+      }]
       }
     }
   },
   created() {
     // 这里应该是从API或store获取数据
-    this.loadPropertyData()
+  
+  },
+  onLoad(res) {
+  	console.log(res)
+	this.propertyId = res.id
+	this.getHouse(res.id)
   },
   methods: {
-    loadPropertyData() {
-      // 模拟数据加载
-      this.baseInfo = {
-        address: '北京市朝阳区朝阳公园路8号',
-        longitude: 116.480881,
-        latitude: 39.933363,
-        wechat: 'example_wechat',
-        phone: '13800138000',
-        title: '朝阳花园小区',
-        location: '朝阳区CBD核心区',
-        area: '50000',
-        roomcount: 2,
-        room: [
-          {
-            RoomNumber: 'A-101',
-            RoomAddress: '1号楼101室',
-            RoomArea: 85,
-            RoomType: '两室一厅',
-            RoomFurniture: [true, false, true, true, false, false, true],
-            RoomVideo: ['video1.mp4', 'video2.mp4'],
-            RoomPayment: {
-              monthly: '5000',
-              quarterly: '4800',
-              yearly: '4500'
-            }
-          },
-          {
-            RoomNumber: 'B-202',
-            RoomAddress: '2号楼202室',
-            RoomArea: 120,
-            RoomType: '三室一厅',
-            RoomFurniture: [true, true, true, true, true, false, true],
-            RoomVideo: ['video3.mp4'],
-            RoomPayment: {
-              monthly: '8000',
-              quarterly: '7500',
-              yearly: '7000'
-            }
-          }
-        ]
-      }
+	  insert_room(id){
+		  console.log(id)
+		  uni.navigateTo({
+		  	url:"/pages/marker/markerAddRoom?id="+id
+		  })
+	  },
+	  delete_room(roomId,index){
+		  console.log(roomId)
+		  const res = wx.cloud.callContainer({
+			  "config": {
+			    "env": "prod-7g3ji5ui73a4702f"
+			  },
+			  "path": "/api/room/delete?RoomId="+roomId,
+			  "header": {
+			    "X-WX-SERVICE": "springboot-2wum",
+			    "content-type": "application/json"
+			  },
+			  "method": "GET"
+		  })
+		  res.then((res)=>{
+			  console.log(res)
+			  	if(res.data.code ==="200")
+				{
+					uni.showToast({
+						title:"删除成功！",
+						icon:"success"
+					})
+					this.getHouse(this.propertyId)
+					
+				}else{
+					uni.showToast({
+						title:"删除失败！",
+						icon:"error"
+					})
+				}
+			
+		  })
+	  },
+	  room(){
+		console.log(this.baseInfo.room)  
+	  },
+	  apiget(){
+		  this.baseInfo.title = "xxxx"
+		  
+	  },
+	  getHouse(id){
+		  const succ =  wx.cloud.callContainer({
+		    "config": {
+		      "env": "prod-7g3ji5ui73a4702f"
+		    },
+		    "path": "/api/house/gethouse?id="+39,
+		    "header": {
+		      "X-WX-SERVICE": "springboot-2wum",
+		      "content-type": "application/json"
+		    },
+		    "method": "GET"
+		  })
+		  console.log(succ)
+		  succ.then((res)=>{
+		  	if(res.data.code ==="200")
+		  	 this.baseInfo = res.data.data
+		  	 
+		  	console.log(this.baseInfo)})
+		  
+     
     },
+	 formatPayment(payment) {
+	      if (!payment) return '暂无数据'
+	      const methods = []
+		  console.log(payment)
+	      if (payment.monthly) methods.push(`月付: ¥${payment.monthly}`)
+	      if (payment.quarterly) methods.push(`半年付: ¥${payment.quarterly}`)
+	      if (payment.yearly) methods.push(`年付: ¥${payment.yearly}`)
+	      return methods.join(' / ') || '价格面议'
+	    },
+	    
+	    formatFurniture(furniture) {
+	      if (!furniture || !furniture.length) return '无'
+	      const items = ["浴缸","花洒","冰箱","空调","微波炉","洗衣机","油烟机"]
+	      return furniture
+	        .map((hasItem, index) => hasItem ? items[index] : null)
+	        .filter(Boolean)
+	        .join('、') || '基础配置'
+	    },
+	    
+	    previewVideo(videoUrl) {
+	      uni.previewVideo({
+	        current: 0,
+	        urls: [videoUrl]
+	      })
+	    }
     
-    formatPayment(payment) {
-      if (!payment) return '暂无数据'
-      const methods = []
-      if (payment.monthly) methods.push(`月付: ¥${payment.monthly}`)
-      if (payment.quarterly) methods.push(`季付: ¥${payment.quarterly}`)
-      if (payment.yearly) methods.push(`年付: ¥${payment.yearly}`)
-      return methods.join(' / ') || '价格面议'
-    },
     
-    formatFurniture(furniture) {
-      if (!furniture || !furniture.length) return '无'
-      const items = ['床', '沙发', '餐桌', '衣柜', '电视', '冰箱', '洗衣机']
-      return furniture
-        .map((hasItem, index) => hasItem ? items[index] : null)
-        .filter(Boolean)
-        .join('、') || '基础配置'
-    },
-    
-    previewVideo(videoUrl) {
-      uni.previewVideo({
-        current: 0,
-        urls: [videoUrl]
-      })
-    }
   }
 }
 </script>
