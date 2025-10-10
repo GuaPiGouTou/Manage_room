@@ -6,9 +6,8 @@
 		:scale="16" 
 		:controls="controls" @controltap="returnPostion" @callouttap="TapMarker"
 		></map>
-		<button @tap="Tapto">ddd</button>
-		<button @tap="addmarker">添加标记点</button>
-		<button @tap="startrefresh">点击刷新</button>
+		<button type="primary" @tap="addmarker">添加标记点</button>
+		<button type="default" @tap="startrefresh">点击刷新</button>
 		
 
 	</view>
@@ -18,6 +17,7 @@
 	export default {
 		data() {
 			return {
+				msg:"demo",
 				data:null,
 				latitude: 1,
 				longitude: 1,
@@ -83,6 +83,11 @@
 			}
 		},
 		onLoad() {
+			// 初始化云开发
+			 wx.cloud.init({
+			   env: 'prod-7g3ji5ui73a4702f', // 替换为你的实际环境ID
+			   traceUser: true // 是否记录用户访问
+			 })
 			//获取定位权限并定位当前位置
 			this.getSetting()
 			//获取所有标记进行渲染
@@ -96,6 +101,11 @@
 			this.getAllMark()
 			setTimeout(()=>{uni.stopPullDownRefresh()},3000)
 		},
+		 onShow() {
+		    if (wx.canIUse('hideHomeButton')) {
+		      wx.hideHomeButton()
+		    }
+		  },
 		methods: {
 			//点击刷新
 			startrefresh(){
@@ -142,12 +152,13 @@
 				// 检查业务状态码
 				if (response.data.code === "200") {
 				  console.log("操作成功:", response.data.msg);
+				 
 				this.data = this.convertApiDataToMarkers(response.data.data)
 				this.covers.push(...this.data)
 				console.log(this.covers)
 				} else {
 				  console.error("业务错误:", response.data.msg);
-				 this.msg = response.data.msg;
+				
 				 this.$refs.error.open('center');
 				}
 			  } else {
@@ -156,6 +167,7 @@
 			  }
 			}).catch(error => {
 			  console.error("标记请求失败:", error);
+			  
 			  // 错误处理逻辑...
 			});
 			},
@@ -223,7 +235,7 @@
 			},
 			TapMarker(e){
 				console.log(e.markerId)
-				wx.redirectTo({
+				wx.navigateTo({
 					url:"/pages/marker/marker?id="+e.markerId,
 					fail(e) {
 						console.log(e)

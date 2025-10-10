@@ -87,7 +87,25 @@
 	          </view>
 	          
 	          <!-- 视频预览 -->
-	        
+	        <!-- 视频预览 -->
+	        <view class="video-section" v-if="room.roomVideo && room.roomVideo.length > 0">
+	          <text class="section-title">视频预览</text>
+	          <view class="video-thumbnails">
+	            <view 
+	              v-for="(video, videoIndex) in room.roomVideo" 
+	              :key="videoIndex" 
+	              class="video-thumb" 
+	              @click="previewVideo(video)"
+	            >
+	              <video  
+	                class="video-icon" 
+					:src="video"
+	              
+	              ></video>
+	              <text class="video-index">视频{{ videoIndex + 1 }}</text>
+	            </view>
+	          </view>
+	        </view>
 	        </view>
 	      </view>
 	
@@ -98,6 +116,7 @@
 export default {
   data() { 
     return {
+		urls:[],
 		propertyId:1,
       baseInfo: {
         address: '',
@@ -132,11 +151,45 @@ export default {
   
   },
   onLoad(res) {
-  	console.log(res)
+  	
 	this.propertyId = res.id
 	this.getHouse(res.id)
   },
   methods: {
+	// getvideo() {
+	//   const that = this;
+	  
+	//   // 遍历所有房间
+	//   this.baseInfo.room.forEach((room, roomIndex) => {
+	//     // 检查是否有视频
+	//     if (room.roomVideo && room.roomVideo.length > 0) {
+	//       // 为每个视频文件获取临时URL
+	//       wx.cloud.getTempFileURL({
+	//         fileList: room.roomVideo.map(fileID => ({
+	//           fileID: fileID,
+	//           maxAge: 60 * 60 // 一小时有效期
+	//         }))
+	//       }).then(res => {
+	//         // 更新视频URL数组
+	//         const newVideoUrls = res.fileList.map(file => file.tempFileURL);
+	        
+	//         // 使用Vue的set方法确保响应式更新
+	//         that.$set(that.baseInfo.room, roomIndex, {
+	//           ...that.baseInfo.room[roomIndex],
+	//           roomVideo: newVideoUrls
+	//         });
+	        
+	//         console.log('更新后的房间数据:', that.baseInfo.room);
+	//       }).catch(error => {
+	//         console.error('获取视频临时URL失败:', error);
+	//         uni.showToast({
+	//           title: '获取视频链接失败',
+	//           icon: 'none'
+	//         });
+	//       });
+	//     }
+	//   });
+	// },
 	  insert_room(id){
 		  console.log(id)
 		  uni.navigateTo({
@@ -187,7 +240,7 @@ export default {
 		    "config": {
 		      "env": "prod-7g3ji5ui73a4702f"
 		    },
-		    "path": "/api/house/gethouse?id="+39,
+		    "path": "/api/house/gethouse?id="+id,
 		    "header": {
 		      "X-WX-SERVICE": "springboot-2wum",
 		      "content-type": "application/json"
@@ -198,7 +251,7 @@ export default {
 		  succ.then((res)=>{
 		  	if(res.data.code ==="200")
 		  	 this.baseInfo = res.data.data
-		  	 
+		  	 // this.getvideo()
 		  	console.log(this.baseInfo)})
 		  
      
@@ -220,22 +273,60 @@ export default {
 	        .map((hasItem, index) => hasItem ? items[index] : null)
 	        .filter(Boolean)
 	        .join('、') || '基础配置'
-	    },
-	    
-	    previewVideo(videoUrl) {
-	      uni.previewVideo({
-	        current: 0,
-	        urls: [videoUrl]
-	      })
 	    }
-    
-    
-  }
+	    
+	   } 
 }
 </script>
 
 <style>
 /* 基础样式 */
+
+/* 视频区域 */
+.video-section {
+  margin-top: 20rpx;
+  padding-top: 15rpx;
+  border-top: 1rpx dashed #ddd;
+}
+
+.section-title {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.video-thumbnails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15rpx;
+}
+
+.video-thumb {
+  width: 200rpx;
+  height: 120rpx;
+  background-color: #f0f0f0;
+  border-radius: 8rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-icon {
+  width: 60rpx;
+  height: 60rpx;
+  opacity: 0.7;
+}
+
+.video-index {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+
 .property-container {
   padding: 20rpx;
   background-color: #f5f5f5;
@@ -382,8 +473,8 @@ export default {
 }
 
 .video-thumb {
-  width: 200rpx;
-  height: 120rpx;
+  width: 300rpx;
+  height: 520rpx;
   background-color: #f0f0f0;
   border-radius: 8rpx;
   display: flex;
@@ -395,8 +486,8 @@ export default {
 }
 
 .video-icon {
-  width: 60rpx;
-  height: 60rpx;
+  width: 220rpx;
+  height: 1200rpx;
   opacity: 0.7;
 }
 

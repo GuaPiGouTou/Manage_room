@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const _sfc_main = {
   data() {
     return {
+      msg: "demo",
       data: null,
       latitude: 1,
       longitude: 1,
@@ -64,6 +65,12 @@ const _sfc_main = {
     };
   },
   onLoad() {
+    common_vendor.wx$1.cloud.init({
+      env: "prod-7g3ji5ui73a4702f",
+      // 替换为你的实际环境ID
+      traceUser: true
+      // 是否记录用户访问
+    });
     this.getSetting();
     this.getAllMark();
   },
@@ -75,6 +82,11 @@ const _sfc_main = {
     setTimeout(() => {
       common_vendor.index.stopPullDownRefresh();
     }, 3e3);
+  },
+  onShow() {
+    if (common_vendor.wx$1.canIUse("hideHomeButton")) {
+      common_vendor.wx$1.hideHomeButton();
+    }
   },
   methods: {
     //点击刷新
@@ -120,24 +132,23 @@ const _sfc_main = {
         },
         "method": "GET"
       });
-      common_vendor.index.__f__("log", "at pages/map/map.vue:138", res);
+      common_vendor.index.__f__("log", "at pages/map/map.vue:148", res);
       res.then((response) => {
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/map/map.vue:144", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/map/map.vue:154", "操作成功:", response.data.msg);
             this.data = this.convertApiDataToMarkers(response.data.data);
             this.covers.push(...this.data);
-            common_vendor.index.__f__("log", "at pages/map/map.vue:147", this.covers);
+            common_vendor.index.__f__("log", "at pages/map/map.vue:158", this.covers);
           } else {
-            common_vendor.index.__f__("error", "at pages/map/map.vue:149", "业务错误:", response.data.msg);
-            this.msg = response.data.msg;
+            common_vendor.index.__f__("error", "at pages/map/map.vue:160", "业务错误:", response.data.msg);
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/map/map.vue:154", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/map/map.vue:165", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/map/map.vue:158", "标记请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/map/map.vue:169", "标记请求失败:", error);
       });
     },
     //当前位置定位
@@ -186,26 +197,26 @@ const _sfc_main = {
             }
           };
           this.covers[0] = this.inclde_covers[0];
-          common_vendor.index.__f__("log", "at pages/map/map.vue:210", "坐标设置完毕");
+          common_vendor.index.__f__("log", "at pages/map/map.vue:222", "坐标设置完毕");
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/map/map.vue:213", "定位失败:", err);
+          common_vendor.index.__f__("error", "at pages/map/map.vue:225", "定位失败:", err);
         }
       });
     },
     returnPostion() {
-      common_vendor.index.__f__("log", "at pages/map/map.vue:218", "cz");
+      common_vendor.index.__f__("log", "at pages/map/map.vue:230", "cz");
       this.covers[0] = null;
       this.inclde_covers[0] = null;
-      common_vendor.index.__f__("log", "at pages/map/map.vue:221", this.latitude + "\n" + this.longitude);
+      common_vendor.index.__f__("log", "at pages/map/map.vue:233", this.latitude + "\n" + this.longitude);
       this.fetchLocation();
     },
     TapMarker(e) {
-      common_vendor.index.__f__("log", "at pages/map/map.vue:225", e.markerId);
-      common_vendor.wx$1.redirectTo({
+      common_vendor.index.__f__("log", "at pages/map/map.vue:237", e.markerId);
+      common_vendor.wx$1.navigateTo({
         url: "/pages/marker/marker?id=" + e.markerId,
         fail(e2) {
-          common_vendor.index.__f__("log", "at pages/map/map.vue:229", e2);
+          common_vendor.index.__f__("log", "at pages/map/map.vue:241", e2);
         }
       });
     },
@@ -227,9 +238,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     f: $data.controls,
     g: common_vendor.o((...args) => $options.returnPostion && $options.returnPostion(...args)),
     h: common_vendor.o((...args) => $options.TapMarker && $options.TapMarker(...args)),
-    i: common_vendor.o((...args) => _ctx.Tapto && _ctx.Tapto(...args)),
-    j: common_vendor.o((...args) => $options.addmarker && $options.addmarker(...args)),
-    k: common_vendor.o((...args) => $options.startrefresh && $options.startrefresh(...args))
+    i: common_vendor.o((...args) => $options.addmarker && $options.addmarker(...args)),
+    j: common_vendor.o((...args) => $options.startrefresh && $options.startrefresh(...args))
   };
 }
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

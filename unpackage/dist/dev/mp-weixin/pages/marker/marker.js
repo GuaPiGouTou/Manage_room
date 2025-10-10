@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const _sfc_main = {
   data() {
     return {
+      urls: [],
       propertyId: 1,
       baseInfo: {
         address: "",
@@ -35,19 +36,49 @@ const _sfc_main = {
   created() {
   },
   onLoad(res) {
-    common_vendor.index.__f__("log", "at pages/marker/marker.vue:135", res);
     this.propertyId = res.id;
     this.getHouse(res.id);
   },
   methods: {
+    // getvideo() {
+    //   const that = this;
+    //   // 遍历所有房间
+    //   this.baseInfo.room.forEach((room, roomIndex) => {
+    //     // 检查是否有视频
+    //     if (room.roomVideo && room.roomVideo.length > 0) {
+    //       // 为每个视频文件获取临时URL
+    //       wx.cloud.getTempFileURL({
+    //         fileList: room.roomVideo.map(fileID => ({
+    //           fileID: fileID,
+    //           maxAge: 60 * 60 // 一小时有效期
+    //         }))
+    //       }).then(res => {
+    //         // 更新视频URL数组
+    //         const newVideoUrls = res.fileList.map(file => file.tempFileURL);
+    //         // 使用Vue的set方法确保响应式更新
+    //         that.$set(that.baseInfo.room, roomIndex, {
+    //           ...that.baseInfo.room[roomIndex],
+    //           roomVideo: newVideoUrls
+    //         });
+    //         uni.__f__('log','at pages/marker/marker.vue:182','更新后的房间数据:', that.baseInfo.room);
+    //       }).catch(error => {
+    //         uni.__f__('error','at pages/marker/marker.vue:184','获取视频临时URL失败:', error);
+    //         uni.showToast({
+    //           title: '获取视频链接失败',
+    //           icon: 'none'
+    //         });
+    //       });
+    //     }
+    //   });
+    // },
     insert_room(id) {
-      common_vendor.index.__f__("log", "at pages/marker/marker.vue:141", id);
+      common_vendor.index.__f__("log", "at pages/marker/marker.vue:194", id);
       common_vendor.index.navigateTo({
         url: "/pages/marker/markerAddRoom?id=" + id
       });
     },
     delete_room(roomId, index) {
-      common_vendor.index.__f__("log", "at pages/marker/marker.vue:147", roomId);
+      common_vendor.index.__f__("log", "at pages/marker/marker.vue:200", roomId);
       const res = common_vendor.wx$1.cloud.callContainer({
         "config": {
           "env": "prod-7g3ji5ui73a4702f"
@@ -60,7 +91,7 @@ const _sfc_main = {
         "method": "GET"
       });
       res.then((res2) => {
-        common_vendor.index.__f__("log", "at pages/marker/marker.vue:160", res2);
+        common_vendor.index.__f__("log", "at pages/marker/marker.vue:213", res2);
         if (res2.data.code === "200") {
           common_vendor.index.showToast({
             title: "删除成功！",
@@ -76,7 +107,7 @@ const _sfc_main = {
       });
     },
     room() {
-      common_vendor.index.__f__("log", "at pages/marker/marker.vue:179", this.baseInfo.room);
+      common_vendor.index.__f__("log", "at pages/marker/marker.vue:232", this.baseInfo.room);
     },
     apiget() {
       this.baseInfo.title = "xxxx";
@@ -86,25 +117,25 @@ const _sfc_main = {
         "config": {
           "env": "prod-7g3ji5ui73a4702f"
         },
-        "path": "/api/house/gethouse?id=39",
+        "path": "/api/house/gethouse?id=" + id,
         "header": {
           "X-WX-SERVICE": "springboot-2wum",
           "content-type": "application/json"
         },
         "method": "GET"
       });
-      common_vendor.index.__f__("log", "at pages/marker/marker.vue:197", succ);
+      common_vendor.index.__f__("log", "at pages/marker/marker.vue:250", succ);
       succ.then((res) => {
         if (res.data.code === "200")
           this.baseInfo = res.data.data;
-        common_vendor.index.__f__("log", "at pages/marker/marker.vue:202", this.baseInfo);
+        common_vendor.index.__f__("log", "at pages/marker/marker.vue:255", this.baseInfo);
       });
     },
     formatPayment(payment) {
       if (!payment)
         return "暂无数据";
       const methods = [];
-      common_vendor.index.__f__("log", "at pages/marker/marker.vue:209", payment);
+      common_vendor.index.__f__("log", "at pages/marker/marker.vue:262", payment);
       if (payment.monthly)
         methods.push(`月付: ¥${payment.monthly}`);
       if (payment.quarterly)
@@ -118,12 +149,6 @@ const _sfc_main = {
         return "无";
       const items = ["浴缸", "花洒", "冰箱", "空调", "微波炉", "洗衣机", "油烟机"];
       return furniture.map((hasItem, index) => hasItem ? items[index] : null).filter(Boolean).join("、") || "基础配置";
-    },
-    previewVideo(videoUrl) {
-      common_vendor.index.previewVideo({
-        current: 0,
-        urls: [videoUrl]
-      });
     }
   }
 };
@@ -139,7 +164,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     h: common_vendor.t($data.baseInfo.roomcount),
     i: common_vendor.o((...args) => $options.room && $options.room(...args)),
     j: common_vendor.f($data.baseInfo.room, (room, index, i0) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.t(room.roomNumber || "未编号"),
         b: common_vendor.t(room.roomType || "未分类"),
         c: common_vendor.t(room.roomAddress || "同小区地址"),
@@ -147,8 +172,19 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
         e: common_vendor.t($options.formatPayment(room.roomPayment)),
         f: common_vendor.t($options.formatFurniture(room.roomFurniture)),
         g: common_vendor.o(($event) => $options.delete_room(room.roomId, index), index),
-        h: index
-      };
+        h: room.roomVideo && room.roomVideo.length > 0
+      }, room.roomVideo && room.roomVideo.length > 0 ? {
+        i: common_vendor.f(room.roomVideo, (video, videoIndex, i1) => {
+          return {
+            a: video,
+            b: common_vendor.t(videoIndex + 1),
+            c: videoIndex,
+            d: common_vendor.o(($event) => _ctx.previewVideo(video), videoIndex)
+          };
+        })
+      } : {}, {
+        j: index
+      });
     })
   };
 }

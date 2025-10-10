@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/index/index",
     "pages/map/map",
+    "pages/index/index",
     "pages/marker/marker",
     "pages/marker/addMarker/addMarker",
     "pages/marker/addMarker/NextRoom",

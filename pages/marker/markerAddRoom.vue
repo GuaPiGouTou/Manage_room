@@ -129,7 +129,8 @@
 				  'yearly': 0
 				},
 			  RoomFurniture:  [false, false, false, false,false,false,false],
-			  RoomVideo: []// 提取文件路径
+			  RoomVideo: [],// 提取文件路径
+			  PropertyId:0
 		  },
 		roomCount:null,
 		MaxCount:null,
@@ -140,6 +141,7 @@
       }
     },
 	onLoad(res) {
+		this.roomdata.PropertyId = res.id
 		this.PropertyId = res.id
 	},
 	
@@ -160,7 +162,7 @@
 		successbvideo_toMap(){
 			 this.$refs.success.close('center');
 			  uni.redirectTo({
-			               	url:"/pages/map/map"
+			               	url:"/pages/marker/marker"
 			               })
 		},
 		//上传视频
@@ -217,7 +219,7 @@
 			  // 上传表单
 			  	console.log("-----submit----")
 			  console.log(this.roomdata)
-			  // this.sumbit()
+			  this.sumbit()
 		  })
 			
 	
@@ -240,7 +242,7 @@
 			  							  },
 			  							  success(res){
 			  									console.log("uploadFile_success")
-			  									this.roomdata.RoomVideo[i] = res.fileID
+			  									that.roomdata.RoomVideo[i] = res.fileID
 												
 			  							
 			  							  },
@@ -267,7 +269,7 @@
 	
 	 //房间信息验证模块
 	 roomsVerify(){
-			// //5.所有房间支付选项验证
+			// //1.所有房间支付选项验证
 	
 		   
 		   	const validPayments = Object.values(this.roomdata.RoomPayment)
@@ -282,7 +284,7 @@
 		   	   return false;
 		   	}
 			
-			// 6. 媒体文件验证i
+			// 2. 媒体文件验证i
 			
 			if (this.filepath.length === 0) {
 			  uni.showToast({
@@ -300,46 +302,47 @@
 	 },
 	 //上传表单信息
 	 sumbit(){
-		console.log(this.roomdata)
-		 // const res = wx.cloud.callContainer({
-		 //     "config": {
-		 //       "env": "prod-7g3ji5ui73a4702f"
-		 //     },
-		 //     "path": "/api/house/submit",
-		 //     "header": {
-		 //       "X-WX-SERVICE": "springboot-2wum",
-		 //       "content-type": "application/json"
-		 //     },
-		 //     "method": "POST",
-		 //     "data": this.roomdata
+		
+		
+		 const res = wx.cloud.callContainer({
+		     "config": {
+		       "env": "prod-7g3ji5ui73a4702f"
+		     },
+		     "path": "/api/room/insert",
+		     "header": {
+		       "X-WX-SERVICE": "springboot-2wum",
+		       "content-type": "application/json"
+		     },
+		     "method": "POST",
+		     "data": this.roomdata
 		 	
-		 //   })
-		 //   console.log(res)
-		 //   res.then(response => {
-		 //   // 在这里可以访问 response 对象
-		 //   console.log("API 响应:", response);
+		   })
+		   console.log(res)
+		   res.then(response => {
+		   // 在这里可以访问 response 对象
+		   console.log("API 响应:", response);
 		   
-		 //   // 检查 HTTP 状态码
-		 //   if (response.statusCode === 200) {
-		 // 	// 检查业务状态码
-		 // 	if (response.data.code === "200") {
-		 // 	  console.log("操作成功:", response.data.msg);
-			//   this.$store.commit('CLEAR_ALL_DATA');
-		 // 	 this.msg = response.data.msg;
-		 // 	 this.$refs.success.open('center');
-		 // 	} else {
-		 // 	  console.error("业务错误:", response.data.msg);
-		 // 	 this.msg = response.data.msg;
-		 // 	 this.$refs.error.open('center');
-		 // 	}
-		 //   } else {
-		 // 	console.error("HTTP 错误:", response.statusCode);
-		 // 	// 错误处理逻辑...
-		 //   }
-		 // }).catch(error => {
-		 //   console.error("请求失败:", error);
-		 //   // 错误处理逻辑...
-		 // });
+		   // 检查 HTTP 状态码
+		   if (response.statusCode === 200) {
+		 	// 检查业务状态码
+		 	if (response.data.code === "200") {
+		 	  console.log("操作成功:", response.data.msg);
+			
+		 	 this.msg = response.data.msg;
+		 	 this.$refs.success.open('center');
+		 	} else {
+		 	  console.error("业务错误:", response.data.msg);
+		 	 this.msg = response.data.msg;
+		 	 this.$refs.error.open('center');
+		 	}
+		   } else {
+		 	console.error("HTTP 错误:", response.statusCode);
+		 	// 错误处理逻辑...
+		   }
+		 }).catch(error => {
+		   console.error("请求失败:", error);
+		   // 错误处理逻辑...
+		 });
 		 
 	 }
 	 
