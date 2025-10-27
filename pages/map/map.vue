@@ -8,6 +8,7 @@
 		></map>
 		<button type="primary" @tap="addmarker">添加标记点</button>
 		<button type="default" @tap="startrefresh">点击刷新</button>
+		<button type="default" @tap="selectviode">选择视频</button>
 		
 
 	</view>
@@ -88,6 +89,22 @@
 			   env: 'prod-7g3ji5ui73a4702f', // 替换为你的实际环境ID
 			   traceUser: true // 是否记录用户访问
 			 })
+			 
+			 
+			const  res =  wx.cloud.callContainer({
+			   "config": {
+			     "env": "prod-7g3ji5ui73a4702f"
+			   },
+			   "path": "/api/count",
+			   "header": {
+			     "X-WX-SERVICE": "springboot-x535"
+			   },
+			   "method": "POST",
+			   "data": {
+			     "action": "inc"
+			   }
+			 })
+			 console.log(res)
 			//获取定位权限并定位当前位置
 			this.getSetting()
 			//获取所有标记进行渲染
@@ -107,6 +124,30 @@
 		    }
 		  },
 		methods: {
+			//选择视频
+			selectviode(){
+							
+				// 将视频选择完毕后的路径保存并展示出
+				var flag  = true
+				wx.chooseMedia({
+					count:3,
+					mediaType:["video"],
+					maxDuration:60,
+					success:(res)=> {
+						console.log(res)
+						console.log(res.tempFiles[0].size/1048576)
+						console.log("chooseMedia_Success")
+						
+					},
+					fail:(res)=>{
+						console.log("chooseMedia")
+		
+					}
+				})
+				
+							
+						
+			},
 			//点击刷新
 			startrefresh(){
 				uni.startPullDownRefresh()
@@ -140,7 +181,7 @@
 				  },
 				  "path": "/api/mark/get",
 				  "header": {
-				    "X-WX-SERVICE": "springboot-2wum",
+				    "X-WX-SERVICE": "springboot-x535",
 				    "content-type": "application/json"
 				  },
 				  "method": "GET"

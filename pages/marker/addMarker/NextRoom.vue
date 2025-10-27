@@ -8,7 +8,7 @@
 	   <view class="section-title">房间数：{{roomCount+1}}/{{MaxCount}}</view>
       <input class="input" placeholder="房间号" v-model="roomdata.RoomNumber" />
       <input class="input" placeholder="具体地址" v-model="roomdata.RoomAddress" />
-      <input class="input" placeholder="面积（平方米）" v-model="roomdata.RoomArea" />
+      <input class="input" type="number" placeholder="面积（平方米）" v-model="roomdata.RoomArea" />
       <input class="input" placeholder="房型（如：2室1厅）" v-model="roomdata.RoomType" />
     </view>
 
@@ -322,6 +322,29 @@
       },
 	  //视频上传
 	async  submitVideo(){
+		 // 先检查权限（iOS 需要）
+		  try {
+		    const res = await uni.getSetting();
+		    if (!res.authSetting['scope.writePhotosAlbum']) {
+		      await uni.authorize({
+		        scope: 'scope.writePhotosAlbum'
+		      });
+		    }
+		  } catch (err) {
+		   if (err.errCode === -503002) {
+		       uni.showModal({
+		         title: '提示',
+		         content: '需要您授权访问相册和存储才能上传视频',
+		         confirmText: '去设置',
+		         success: (res) => {
+		           if (res.confirm) {
+		             uni.openSetting(); // 打开设置页面让用户手动开启权限
+		           }
+		         }
+		       });
+		     }
+		  }
+		  
 		   uni.showLoading({ title: '视频上传中...', mask: true });
 		   let rooms = this.$store.state.baseInfo.room;
 		   let house = this.$store.state.baseInfo;
@@ -368,7 +391,10 @@
 			let filePath =item.tempFilePath;
 			let p =wx.cloud.uploadFile({
 				cloudPath:cloudPath,
-				filePath:filePath
+				filePath:filePath,
+				config: {
+				    env: 'prod-7g3ji5ui73a4702f' // 显式指定环境ID
+				  }
 			});
 			fileID.push(p)
 		})
@@ -475,7 +501,7 @@
 		     },
 		     "path": "/api/house/submit",
 		     "header": {
-		       "X-WX-SERVICE": "springboot-2wum",
+		       "X-WX-SERVICE": "springboot-x535",
 		       "content-type": "application/json"
 		     },
 		     "method": "POST",

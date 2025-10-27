@@ -258,7 +258,7 @@ const _sfc_main = {
         },
         "path": "/api/house/submit",
         "header": {
-          "X-WX-SERVICE": "springboot-2wum",
+          "X-WX-SERVICE": "springboot-x535",
           "content-type": "application/json"
         },
         "method": "POST",

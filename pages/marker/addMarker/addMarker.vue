@@ -34,7 +34,7 @@
       <view class="section-title">房源信息</view>
       <input class="input" placeholder="房源标题" v-model="MarkerData.title" />
       <input class="input" placeholder="具体地点" v-model="MarkerData.location" />
-      <input class="input" placeholder="面积（平方米）" v-model="MarkerData.area" />
+      <input class="input" type="number" placeholder="面积（平方米）" v-model="MarkerData.area" />
       <view ><text style="margin-left: 10rpx; margin-bottom: 10rpx; font-weight: 500;">房间数量</text>
 	  <input class="input" placeholder="" v-model="MarkerData.roomcount" type="number" /></view>
     </view>
@@ -337,7 +337,7 @@
 			    },
 			    "path": "/api/house/submit",
 			    "header": {
-			      "X-WX-SERVICE": "springboot-2wum",
+			      "X-WX-SERVICE": "springboot-x535",
 			      "content-type": "application/json"
 			    },
 			    "method": "POST",

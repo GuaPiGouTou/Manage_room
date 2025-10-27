@@ -47,8 +47,8 @@ const _sfc_main = {
     },
     successbvideo_toMap() {
       this.$refs.success.close("center");
-      common_vendor.index.redirectTo({
-        url: "/pages/marker/marker"
+      common_vendor.index.navigateBack({
+        url: "/pages/marker/marker?id=" + this.PropertyId
       });
     },
     //上传视频
@@ -61,6 +61,7 @@ const _sfc_main = {
           success: (res) => {
             common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:180", res.tempFiles[0].size / 1048576);
             this.filepath.push(...res.tempFiles);
+            common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:183", this.filepath);
           },
           fail: (res) => {
           }
@@ -88,35 +89,46 @@ const _sfc_main = {
       if (!this.roomsVerify())
         return;
       this.submitVideo().then(() => {
-        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:220", "-----submit----");
-        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:221", this.roomdata);
+        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:221", "-----submit----");
+        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:222", this.roomdata);
         this.sumbit();
       });
+    },
+    // 单独封装的视频上传方法（异步）传入房间号，对当前房间的视频临时路径进行上传
+    async VideoUp(title) {
+      if (!this.filepath || this.filepath.length === 0) {
+        return [];
+      }
+      let fileID = [];
+      this.filepath.forEach((item, index) => {
+        let cloudPath = "map/" + title + "_" + index + ".mp4";
+        let filePath = item.tempFilePath;
+        let p = common_vendor.wx$1.cloud.uploadFile({
+          cloudPath,
+          filePath,
+          config: {
+            env: "prod-7g3ji5ui73a4702f"
+            // 显式指定环境ID
+          }
+        });
+        fileID.push(p);
+      });
+      fileID = await Promise.all(fileID);
+      fileID = fileID.map((item) => {
+        return item.fileID;
+      });
+      return fileID;
     },
     //视频上传
     async submitVideo() {
       common_vendor.index.showLoading({ title: "视频上传中...", mask: true });
-      let files = [];
-      const that = this;
-      for (let i = 0; i < that.filepath.length; i++) {
-        let p = common_vendor.wx$1.cloud.uploadFile({
-          cloudPath: "map/" + this.title + i + ".mp4",
-          filePath: that.filepath[i].tempFilePath,
-          config: {
-            env: "prod-7g3ji5ui73a4702f"
-            // 微信云托管环境ID
-          },
-          success(res) {
-            common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:244", "uploadFile_success");
-            that.roomdata.RoomVideo[i] = res.fileID;
-          },
-          fail(res) {
-            common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:250", "uploadFile_fail");
-          }
+      await this.VideoUp(this.roomdata.RoomNumber).then((res) => {
+        res.forEach((item, index) => {
+          this.roomdata.RoomVideo[index] = item;
         });
-        files.push(p);
-      }
-      await Promise.all(files);
+        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:262", this.roomdata.RoomVideo);
+        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:263", "---------");
+      });
       common_vendor.index.hideLoading();
       common_vendor.index.showToast({
         title: "上传成功",
@@ -140,7 +152,7 @@ const _sfc_main = {
           icon: "none",
           duration: 3e3
         });
-        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:295", "请至少上传一个视频文件");
+        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:314", "请至少上传一个视频文件");
         return false;
       }
       return true;
@@ -153,30 +165,30 @@ const _sfc_main = {
         },
         "path": "/api/room/insert",
         "header": {
-          "X-WX-SERVICE": "springboot-2wum",
+          "X-WX-SERVICE": "springboot-x535",
           "content-type": "application/json"
         },
         "method": "POST",
         "data": this.roomdata
       });
-      common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:320", res);
+      common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:339", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:323", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:342", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:329", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/markerAddRoom.vue:348", "操作成功:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/markerAddRoom.vue:334", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/markerAddRoom.vue:353", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/markerAddRoom.vue:339", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/markerAddRoom.vue:358", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/markerAddRoom.vue:343", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/markerAddRoom.vue:362", "请求失败:", error);
       });
     }
   }

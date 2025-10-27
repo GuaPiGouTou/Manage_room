@@ -174,6 +174,27 @@ const _sfc_main = {
     },
     //视频上传
     async submitVideo() {
+      try {
+        const res = await common_vendor.index.getSetting();
+        if (!res.authSetting["scope.writePhotosAlbum"]) {
+          await common_vendor.index.authorize({
+            scope: "scope.writePhotosAlbum"
+          });
+        }
+      } catch (err) {
+        if (err.errCode === -503002) {
+          common_vendor.index.showModal({
+            title: "提示",
+            content: "需要您授权访问相册和存储才能上传视频",
+            confirmText: "去设置",
+            success: (res) => {
+              if (res.confirm) {
+                common_vendor.index.openSetting();
+              }
+            }
+          });
+        }
+      }
       common_vendor.index.showLoading({ title: "视频上传中...", mask: true });
       let rooms = this.$store.state.baseInfo.room;
       let house = this.$store.state.baseInfo;
@@ -185,8 +206,8 @@ const _sfc_main = {
             room.RoomVideo[index2] = item2;
           });
           this.$store.commit("UPDATE_BASEROOMS", { index, data: room });
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:338", this.$store.state.baseInfo.room[index]);
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:339", "---------");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:361", this.$store.state.baseInfo.room[index]);
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:362", "---------");
         });
       });
       await Promise.all(p);
@@ -195,10 +216,10 @@ const _sfc_main = {
         title: "上传成功",
         icon: "success"
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:351", "----base-----");
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:352", this.$store.state.baseInfo);
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:353", "-----rooms----");
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:354", this.$store.state.rooms);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:374", "----base-----");
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:375", this.$store.state.baseInfo);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:376", "-----rooms----");
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:377", this.$store.state.rooms);
     },
     // 单独封装的视频上传方法（异步）
     async VideoUp(title, room) {
@@ -208,7 +229,11 @@ const _sfc_main = {
         let filePath = item.tempFilePath;
         let p = common_vendor.wx$1.cloud.uploadFile({
           cloudPath,
-          filePath
+          filePath,
+          config: {
+            env: "prod-7g3ji5ui73a4702f"
+            // 显式指定环境ID
+          }
         });
         fileID.push(p);
       });
@@ -256,7 +281,7 @@ const _sfc_main = {
       if (this.roomdata.RoomNumber.trim() != "" && this.roomdata.RoomAddress.trim() != "" && this.roomdata.RoomType.trim() != "") {
         this.$store.commit("UPDATE_ROOM", { index: this.roomCount, data: this.roomdata });
         this.$store.commit("UPDATE_BASEROOMS", { index: this.roomCount, data: this.roomdata });
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:428", "roomsVerify");
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:454", "roomsVerify");
       } else {
         common_vendor.index.showToast({
           title: "房间信息不能为空",
@@ -282,7 +307,7 @@ const _sfc_main = {
             icon: "none",
             duration: 3e3
           });
-          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:461", "请至少上传一个视频文件");
+          common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:487", "请至少上传一个视频文件");
           return false;
         }
         return true;
@@ -290,38 +315,38 @@ const _sfc_main = {
     },
     //上传表单信息
     sumbit() {
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:471", this.$store.state.baseInfo);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:497", this.$store.state.baseInfo);
       const res = common_vendor.wx$1.cloud.callContainer({
         "config": {
           "env": "prod-7g3ji5ui73a4702f"
         },
         "path": "/api/house/submit",
         "header": {
-          "X-WX-SERVICE": "springboot-2wum",
+          "X-WX-SERVICE": "springboot-x535",
           "content-type": "application/json"
         },
         "method": "POST",
         "data": this.$store.state.baseInfo
       });
-      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:485", res);
+      common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:511", res);
       res.then((response) => {
-        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:488", "API 响应:", response);
+        common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:514", "API 响应:", response);
         if (response.statusCode === 200) {
           if (response.data.code === "200") {
-            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:494", "操作成功:", response.data.msg);
+            common_vendor.index.__f__("log", "at pages/marker/addMarker/NextRoom.vue:520", "操作成功:", response.data.msg);
             this.$store.commit("CLEAR_ALL_DATA");
             this.msg = response.data.msg;
             this.$refs.success.open("center");
           } else {
-            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:499", "业务错误:", response.data.msg);
+            common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:525", "业务错误:", response.data.msg);
             this.msg = response.data.msg;
             this.$refs.error.open("center");
           }
         } else {
-          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:504", "HTTP 错误:", response.statusCode);
+          common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:530", "HTTP 错误:", response.statusCode);
         }
       }).catch((error) => {
-        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:508", "请求失败:", error);
+        common_vendor.index.__f__("error", "at pages/marker/addMarker/NextRoom.vue:534", "请求失败:", error);
       });
     }
     //

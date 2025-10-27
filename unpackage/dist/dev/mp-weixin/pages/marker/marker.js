@@ -85,7 +85,7 @@ const _sfc_main = {
         },
         "path": "/api/room/delete?RoomId=" + roomId,
         "header": {
-          "X-WX-SERVICE": "springboot-2wum",
+          "X-WX-SERVICE": "springboot-x535",
           "content-type": "application/json"
         },
         "method": "GET"
@@ -119,7 +119,7 @@ const _sfc_main = {
         },
         "path": "/api/house/gethouse?id=" + id,
         "header": {
-          "X-WX-SERVICE": "springboot-2wum",
+          "X-WX-SERVICE": "springboot-x535",
           "content-type": "application/json"
         },
         "method": "GET"

@@ -7,7 +7,7 @@
       <view class="section-title">房间信息</view>
       <input class="input" placeholder="房间号" v-model="roomdata.RoomNumber" />
       <input class="input" placeholder="具体地址" v-model="roomdata.RoomAddress" />
-      <input class="input" placeholder="面积（平方米）" v-model="roomdata.RoomArea" />
+      <input class="input" type="number" placeholder="面积（平方米）" v-model="roomdata.RoomArea" />
       <input class="input" placeholder="房型（如：2室1厅）" v-model="roomdata.RoomType" />
     </view>
 
@@ -161,8 +161,8 @@
 		},
 		successbvideo_toMap(){
 			 this.$refs.success.close('center');
-			  uni.redirectTo({
-			               	url:"/pages/marker/marker"
+			 uni.navigateBack({
+			               	url:"/pages/marker/marker?id="+this.PropertyId
 			               })
 		},
 		//上传视频
@@ -178,8 +178,9 @@
 					success:(res)=> {
 						
 						console.log(res.tempFiles[0].size/1048576)
+						// this.roomdata.RoomVideo.push(...res.tempFiles)	
 						this.filepath.push(...res.tempFiles)		
-						
+						console.log(this.filepath)
 					},
 					fail:(res)=>{
 						flag=false	
@@ -226,44 +227,62 @@
 			  
       
       },
+	// 单独封装的视频上传方法（异步）传入房间号，对当前房间的视频临时路径进行上传
+	async VideoUp(title){
+		 if (!this.filepath || this.filepath.length === 0) {
+		    return [];
+		  }
+			 let fileID = []
+			this.filepath.forEach((item,index)=>{
+				let cloudPath = "map/"+title+"_"+index+".mp4";
+				let filePath =item.tempFilePath;
+				let p =wx.cloud.uploadFile({
+					cloudPath:cloudPath,
+					filePath:filePath,
+					config: {
+					    env: 'prod-7g3ji5ui73a4702f' // 显式指定环境ID
+					  }
+				});
+				fileID.push(p)
+			})
+			fileID = await Promise.all(fileID)
+			fileID = fileID.map((item) => {
+				  return item.fileID;
+				})
+				return fileID;
+	},
 	  //视频上传
 	async  submitVideo(){
 		   uni.showLoading({ title: '视频上传中...', mask: true });
-			let files= []
-			  //视频上传
-			  					  const that = this;
-			  						for(let i = 0;i<that.filepath.length;i++)
-			  						{
-			  							let p = wx.cloud.uploadFile({
-			  							cloudPath:"map/"+this.title+i+".mp4",
-			  							filePath:that.filepath[i].tempFilePath,
-			  							 config: {
-			  								env: 'prod-7g3ji5ui73a4702f' // 微信云托管环境ID
-			  							  },
-			  							  success(res){
-			  									console.log("uploadFile_success")
-			  									that.roomdata.RoomVideo[i] = res.fileID
-												
-			  							
-			  							  },
-			  								fail(res){
-			  									console.log("uploadFile_fail")
-			  									
-			  									}
-			  						})	
-									files.push(p)
-			  						}
+			await this.VideoUp(this.roomdata.RoomNumber).then((res)=>{
+					res.forEach((item,index)=>{
+						this.roomdata.RoomVideo[index] = item
+					})
+					
+					console.log(this.roomdata.RoomVideo)
+					console.log("---------")
+					
+				})
+				
 
 			
-			await Promise.all(files)
+			
 			uni.hideLoading();
 			uni.showToast({
 				title:"上传成功",
 				icon:'success'
-			})  
+			})
+			// 	console.log("----base-----")
+			// console.log(this.$store.state.baseInfo)			
+			//    	console.log("-----rooms----")
+			// console.log(this.$store.state.rooms)			   
+		
+			
+		
+		   
+		   
 		
 	  },
-	  
 	
 	 
 	
@@ -310,7 +329,7 @@
 		     },
 		     "path": "/api/room/insert",
 		     "header": {
-		       "X-WX-SERVICE": "springboot-2wum",
+		       "X-WX-SERVICE": "springboot-x535",
 		       "content-type": "application/json"
 		     },
 		     "method": "POST",

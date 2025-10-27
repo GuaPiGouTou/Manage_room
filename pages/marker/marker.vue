@@ -204,7 +204,7 @@ export default {
 			  },
 			  "path": "/api/room/delete?RoomId="+roomId,
 			  "header": {
-			    "X-WX-SERVICE": "springboot-2wum",
+			    "X-WX-SERVICE": "springboot-x535",
 			    "content-type": "application/json"
 			  },
 			  "method": "GET"
@@ -242,7 +242,7 @@ export default {
 		    },
 		    "path": "/api/house/gethouse?id="+id,
 		    "header": {
-		      "X-WX-SERVICE": "springboot-2wum",
+		      "X-WX-SERVICE": "springboot-x535",
 		      "content-type": "application/json"
 		    },
 		    "method": "GET"
